@@ -1,0 +1,32 @@
+package models;
+
+import jakarta.persistence.*;
+import lombok.*;
+import java.time.Instant;
+
+@Entity
+@Table(name = "notificaciones")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Notificacion {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String mensaje;
+
+    @Column(name = "fecha_envio", nullable = false)
+    private Instant fechaEnvio;
+
+    @Column(nullable = false)
+    private boolean leida;
+}
