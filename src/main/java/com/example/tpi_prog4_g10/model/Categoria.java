@@ -1,4 +1,4 @@
-package models;
+package com.example.tpi_prog4_g10.modelample.tpi_prog4_g10.model;
 
 import jakarta.persistence.*;
 import lombok.*;
