@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.Instant;
+import com.example.tpi_prog4_g10.enums.EstadoSubasta;
 
 @Entity
 @Table(name = "subastas")
@@ -12,15 +13,18 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Subasta {
+public class Subasta { 
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "incremento_minimo", nullable = false, precision = 12, scale = 2)
+    private BigDecimal incrementoMinimo;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "producto_id", nullable = false, unique = true)
-    private Producto producto;
+    private Producto producto; 
 
     @Column(name = "precio_base", nullable = false, precision = 12, scale = 2)
     private BigDecimal precioBase;

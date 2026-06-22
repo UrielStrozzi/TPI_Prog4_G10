@@ -1,8 +1,10 @@
-package models;
+package com.example.tpi_prog4_g10.model;
 
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
+
+import com.example.tpi_prog4_g10.enums.EstadoSubasta;
 
 @Entity
 @Table(name = "historial_estados")

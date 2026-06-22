@@ -1,9 +1,9 @@
-package models;
+package com.example.tpi_prog4_g10.model;
+
+import com.example.tpi_prog4_g10.enums.NombreRol;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.math.BigDecimal;
-import java.time.Instant;
 
 @Entity
 @Table(name = "roles")
