@@ -2,9 +2,9 @@ package com.example.tpi_prog4_g10.controller;
 
 import com.example.tpi_prog4_g10.config.JwtUtils;
 import com.example.tpi_prog4_g10.dto.request.LoginRequest;
-import com.example.tpi_prog4_g10.dto.request.RegistroRequest;
+import com.example.tpi_prog4_g10.dto.request.RegisterRequest;
 import com.example.tpi_prog4_g10.dto.request.response.MensajeResponse;
-import com.example.tpi_prog4_g10.dto.request.response.JwtResponse; // Asegurate de tener este DTO en la misma carpeta
+import com.example.tpi_prog4_g10.dto.request.response.JwtResponse; 
 import com.example.tpi_prog4_g10.model.Usuario;
 import com.example.tpi_prog4_g10.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ public class AuthController {
 
     
     @PostMapping("/registro")
-    public ResponseEntity<MensajeResponse> registrarUsuario(@RequestBody RegistroRequest request) {
+    public ResponseEntity<MensajeResponse> registrarUsuario(@RequestBody RegisterRequest request) {
         
         Usuario nuevoUsuario = Usuario.builder()
                 .nombre(request.getNombre())

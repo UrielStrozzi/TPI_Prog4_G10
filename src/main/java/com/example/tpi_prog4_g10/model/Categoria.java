@@ -2,7 +2,9 @@ package com.example.tpi_prog4_g10.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.util.List;
 
+@Data
 @Entity
 @Table(name = "categorias")
 @Getter
@@ -20,4 +22,7 @@ public class Categoria {
     private String nombre;
 
     private String descripcion;
+    
+    @OneToMany(mappedBy = "categoria", cascade = CascadeType.ALL)
+    private List<Producto> productos;
 }
