@@ -3,6 +3,7 @@ package com.example.tpi_prog4_g10.model;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
+import com.example.tpi_prog4_g10.enums.EstadoNotificacion;
 
 @Entity
 @Table(name = "notificaciones")
@@ -27,6 +28,7 @@ public class Notificacion {
     @Column(name = "fecha_envio", nullable = false)
     private Instant fechaEnvio;
 
-    @Column(nullable = false)
-    private boolean leida;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private EstadoNotificacion estado;
 }
