@@ -20,9 +20,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private UsuarioRepository usuarioRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Usuario usuario = usuarioRepository.findByEmail(email)
-            .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con email: " + email));
+    public UserDetails loadUserByUsername(String loginInput) throws UsernameNotFoundException {
+        
+        Usuario usuario = usuarioRepository.findByNombre(loginInput)
+            .orElseGet(() -> usuarioRepository.findByEmail(loginInput)
+            .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con nombre o email: " + loginInput)));
 
         List<GrantedAuthority> authorities = usuario.getRoles().stream()
             .map(rol -> new SimpleGrantedAuthority(rol.getNombre().name()))
