@@ -25,7 +25,10 @@ public class Usuario {
     private String password;
 
     @Column(nullable = false, length = 50)
-    private String nombre;
+    private String nombre; 
+
+    @Column(nullable = false)
+    private boolean bloqueado;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
