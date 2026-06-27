@@ -22,7 +22,7 @@ public class Disputa {
     private Subasta subasta;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "usuario_id", nullable = false)
+    @JoinColumn(name = "iniciador_id", nullable = false)
     private Usuario reclamante;
 
     @Column(nullable = false, columnDefinition = "TEXT")
@@ -36,4 +36,8 @@ public class Disputa {
 
     @Column(name = "fecha_resolucion")
     private Instant fechaResolucion;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "resuelto_por_id")
+    private Usuario resueltoPor;
 }

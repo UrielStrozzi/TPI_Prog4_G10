@@ -27,8 +27,4 @@ public class Notificacion {
 
     @Column(name = "fecha_envio", nullable = false)
     private Instant fechaEnvio;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private EstadoNotificacion estado;
 }

@@ -7,7 +7,7 @@ import java.time.Instant;
 import com.example.tpi_prog4_g10.enums.EstadoSubasta;
 
 @Entity
-@Table(name = "historial_estados")
+@Table(name = "historial_estados_subasta")
 @Getter
 @Setter
 @NoArgsConstructor
