@@ -7,8 +7,6 @@ import com.example.tpi_prog4_g10.enums.EstadoNotificacion;
 import com.example.tpi_prog4_g10.enums.TipoNotificacion;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.Instant;
-
 @Entity
 @Table(name = "notificaciones", indexes = {
         @Index(name = "idx_notif_usuario_estado", columnList = "usuario_id, estado"),

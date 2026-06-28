@@ -40,7 +40,7 @@ public class AuthController {
         Usuario nuevoUsuario = Usuario.builder()
                 .nombre(request.getNombre())
                 .email(request.getEmail())
-                .password(request.getPassword()) 
+                .passwordHash(request.getPassword()) 
                 .build();
 
         usuarioService.registrarUsuario(nuevoUsuario);

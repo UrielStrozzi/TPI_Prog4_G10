@@ -21,20 +21,24 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String loginInput) throws UsernameNotFoundException {
-        
-        Usuario usuario = usuarioRepository.findByNombre(loginInput)
-            .orElseGet(() -> usuarioRepository.findByEmail(loginInput)
-            .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con nombre o email: " + loginInput)));
+
+        // Acepta login por username O por email
+        Usuario usuario = usuarioRepository.findByUsername(loginInput)
+                .or(() -> usuarioRepository.findByEmail(loginInput))
+                .orElseThrow(() -> new UsernameNotFoundException(
+                        "Usuario no encontrado: " + loginInput));
 
         List<GrantedAuthority> authorities = usuario.getRoles().stream()
-            .map(rol -> new SimpleGrantedAuthority(rol.getNombre().name()))
-            .collect(Collectors.toList());
+                .map(rol -> new SimpleGrantedAuthority("ROLE_" + rol.getNombre().name()))
+                .collect(Collectors.toList());
 
-        
         return new org.springframework.security.core.userdetails.User(
-            usuario.getEmail(),
-            usuario.getPassword(),
-            authorities
-        );
+                usuario.getUsername(),
+                usuario.getPasswordHash(),
+                !usuario.estaEliminado(), // enabled
+                true, // accountNonExpired
+                true, // credentialsNonExpired
+                !usuario.isBloqueado(), // accountNonLocked
+                authorities);
     }
 }

@@ -40,9 +40,8 @@ public class ProductoController {
                 .orElseThrow(() -> new RuntimeException("Error: Categoría no encontrada."));
 
         Producto producto = Producto.builder()
-                .nombre(request.getNombre())
+                .titulo(request.getTitulo())
                 .descripcion(request.getDescripcion())
-                .urlImagen(request.getUrlImagen())
                 .categoria(categoria)
                 .vendedor(vendedor)
                 .build();

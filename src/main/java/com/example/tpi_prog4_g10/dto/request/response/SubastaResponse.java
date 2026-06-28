@@ -11,7 +11,7 @@ import java.time.Instant;
 @Builder
 public class SubastaResponse {
     private Long id;
-    private String productoNombre;
+    private String productoTitulo;
     private BigDecimal precioBase;
     private BigDecimal montoActual;
     private BigDecimal incrementoMinimo;

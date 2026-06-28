@@ -72,7 +72,7 @@ public class PujaService {
                 .subasta(subasta)
                 .usuario(usuario)
                 .monto(montoOfrecido)
-                .fechaPuja(Instant.now())
+                .fechaHora(Instant.now())
                 .build();
         
         pujaRepository.save(nuevaPuja);

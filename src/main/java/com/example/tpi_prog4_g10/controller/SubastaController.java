@@ -78,7 +78,7 @@ public class SubastaController {
     private SubastaResponse convertirADto(Subasta subasta) {
         return SubastaResponse.builder()
                 .id(subasta.getId())
-                .productoNombre(subasta.getProducto().getNombre())
+                .productoTitulo(subasta.getProducto().getTitulo())
                 .precioBase(subasta.getPrecioBase())
                 .montoActual(subasta.getMontoActual())
                 .incrementoMinimo(subasta.getIncrementoMinimo())

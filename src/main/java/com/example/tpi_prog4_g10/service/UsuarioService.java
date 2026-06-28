@@ -29,14 +29,14 @@ public class UsuarioService {
 
     
     public Usuario registrarUsuario(Usuario usuario) {
-        if (usuarioRepository.existsByNombre(usuario.getNombre())) {
+        if (usuarioRepository.existsByUsername(usuario.getNombre())) {
             throw new RuntimeException("Error: El nombre de usuario ya está en uso.");
         }
         if (usuarioRepository.existsByEmail(usuario.getEmail())) {
             throw new RuntimeException("Error: El email ya está en uso.");
         }
 
-        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+        usuario.setPasswordHash(passwordEncoder.encode(usuario.getPasswordHash()));
         Rol rolUser = rolRepository.findByNombre(NombreRol.ROLE_USER)
                 .orElseThrow(() -> new RuntimeException("Error: Rol no encontrado en la base de datos."));
         
@@ -48,7 +48,7 @@ public class UsuarioService {
 
     
     public UsuarioResponse buscarPorUsername(String username) {
-        Usuario usuario = usuarioRepository.findByNombre(username)
+        Usuario usuario = usuarioRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con el nombre: " + username));
         return mapearADto(usuario);
     }
@@ -101,7 +101,7 @@ public class UsuarioService {
     }
 
     public Optional<Usuario> buscarPorNombre(String nombre) {
-        return usuarioRepository.findByNombre(nombre);
+        return usuarioRepository.findByUsername(nombre);
     }
 
     

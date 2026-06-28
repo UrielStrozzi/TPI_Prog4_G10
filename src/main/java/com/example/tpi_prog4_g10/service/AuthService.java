@@ -52,7 +52,7 @@ public class AuthService {
         Usuario usuario = Usuario.builder()
             .nombre(request.getNombre())
             .email(request.getEmail())
-            .password(passwordEncoder.encode(request.getPassword()))
+            .passwordHash(passwordEncoder.encode(request.getPassword()))
             .roles(Set.of(rolUser))
             .build();
 
