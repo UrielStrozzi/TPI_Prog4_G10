@@ -7,12 +7,16 @@ import com.example.tpi_prog4_g10.dto.request.response.MensajeResponse;
 import com.example.tpi_prog4_g10.dto.request.response.JwtResponse; 
 import com.example.tpi_prog4_g10.model.Usuario;
 import com.example.tpi_prog4_g10.service.UsuarioService;
+
+import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
@@ -35,41 +39,41 @@ public class AuthController {
 
     
     @PostMapping("/registro")
-    public ResponseEntity<MensajeResponse> registrarUsuario(@RequestBody RegisterRequest request) {
-        
-        Usuario nuevoUsuario = Usuario.builder()
-                .nombre(request.getNombre())
-                .email(request.getEmail())
-                .passwordHash(request.getPassword()) 
-                .build();
+    public ResponseEntity<MensajeResponse> registrarUsuario(@RequestBody @Valid RegisterRequest request) {
 
-        usuarioService.registrarUsuario(nuevoUsuario);
+    Usuario nuevoUsuario = Usuario.builder()
+            .username(request.getUsername())
+            .nombre(request.getNombre())
+            .apellido(request.getApellido())
+            .email(request.getEmail())
+            .passwordHash(request.getPassword())
+            .build();
 
-        return new ResponseEntity<>(new MensajeResponse("Usuario registrado con éxito."), HttpStatus.CREATED);
-    }
+    usuarioService.registrarUsuario(nuevoUsuario);
+
+    return new ResponseEntity<>(new MensajeResponse("Usuario registrado con éxito."), HttpStatus.CREATED);
+}
 
     
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        
-        
+
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getNombre(), request.getPassword())
+                new UsernamePasswordAuthenticationToken(
+                        request.getLogin(),
+                        request.getPassword())
         );
 
-        
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        
         String jwt = jwtUtils.generarJwtToken(authentication);
-        
-        
+
         User userDetails = (User) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream()
-                .map(item -> item.getAuthority())
+                .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
-    
-        return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getUsername(), roles));
+        return ResponseEntity.ok(
+                new JwtResponse(jwt, userDetails.getUsername(), roles));
     }
 }

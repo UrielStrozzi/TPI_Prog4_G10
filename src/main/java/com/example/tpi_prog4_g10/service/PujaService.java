@@ -43,7 +43,7 @@ public class PujaService {
         }
 
         
-        if (Instant.now().isAfter(subasta.getFechaFin())) {
+        if (Instant.now().isAfter(subasta.getFechaCierre())) {
             throw new RuntimeException("Error: La subasta ya ha cerrado.");
         }
 

@@ -46,7 +46,7 @@ public class AuthService {
             throw new RuntimeException("El email ya está registrado");
         }
 
-        Rol rolUser = rolRepository.findByNombre(NombreRol.ROLE_USER)
+        Rol rolUser = rolRepository.findByNombre(NombreRol.USER)
             .orElseThrow(() -> new RuntimeException("Rol USER no encontrado"));
 
         Usuario usuario = Usuario.builder()
@@ -69,19 +69,25 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
-        
+
         Authentication auth = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(request.getNombre(), request.getPassword())
-        );
+                new UsernamePasswordAuthenticationToken(
+                        request.getLogin(),
+                        request.getPassword()));
+
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         String token = jwtUtils.generarJwtToken(auth);
 
         User userDetails = (User) auth.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .collect(Collectors.toList());
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
 
-        return new AuthResponse(token, "Bearer", userDetails.getUsername(), roles);
+        return new AuthResponse(
+                token,
+                "Bearer",
+                userDetails.getUsername(),
+                roles);
     }
 }

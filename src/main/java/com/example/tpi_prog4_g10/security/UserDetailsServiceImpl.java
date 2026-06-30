@@ -27,7 +27,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .or(() -> usuarioRepository.findByEmail(loginInput))
                 .orElseThrow(() -> new UsernameNotFoundException(
                         "Usuario no encontrado: " + loginInput));
-
+        
         List<GrantedAuthority> authorities = usuario.getRoles().stream()
                 .map(rol -> new SimpleGrantedAuthority("ROLE_" + rol.getNombre().name()))
                 .collect(Collectors.toList());

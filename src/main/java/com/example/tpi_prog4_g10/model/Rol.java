@@ -19,7 +19,8 @@ public class Rol {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Short id;
+    @Column(columnDefinition = "TINYINT UNSIGNED")
+    private Integer id;
 
     @Enumerated(EnumType.STRING)
     @Column(unique = true, nullable = false, length = 30)

@@ -29,7 +29,7 @@ public class UsuarioService {
 
     
     public Usuario registrarUsuario(Usuario usuario) {
-        if (usuarioRepository.existsByUsername(usuario.getNombre())) {
+        if (usuarioRepository.existsByUsername(usuario.getUsername())) {
             throw new RuntimeException("Error: El nombre de usuario ya está en uso.");
         }
         if (usuarioRepository.existsByEmail(usuario.getEmail())) {
@@ -37,7 +37,7 @@ public class UsuarioService {
         }
 
         usuario.setPasswordHash(passwordEncoder.encode(usuario.getPasswordHash()));
-        Rol rolUser = rolRepository.findByNombre(NombreRol.ROLE_USER)
+        Rol rolUser = rolRepository.findByNombre(NombreRol.USER)
                 .orElseThrow(() -> new RuntimeException("Error: Rol no encontrado en la base de datos."));
         
         usuario.getRoles().add(rolUser);

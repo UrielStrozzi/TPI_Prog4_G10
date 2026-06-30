@@ -35,7 +35,7 @@ public class SubastaController {
                 .precioBase(request.getPrecioBase())
                 .incrementoMinimo(request.getIncrementoMinimo())
                 .fechaInicio(request.getFechaInicio())
-                .fechaFin(request.getFechaFin())
+                .fechaCierre(request.getFechaFin())
                 .build();
 
         Subasta nuevaSubasta = subastaService.crearSubasta(subasta);
@@ -83,7 +83,7 @@ public class SubastaController {
                 .montoActual(subasta.getMontoActual())
                 .incrementoMinimo(subasta.getIncrementoMinimo())
                 .fechaInicio(subasta.getFechaInicio())
-                .fechaFin(subasta.getFechaFin())
+                .fechaFin(subasta.getFechaCierre())
                 .estado(subasta.getEstado().name())
                 .nombreGanadorParcial(subasta.getGanador() != null ? subasta.getGanador().getNombre() : null)
                 .build();

@@ -8,8 +8,14 @@ import jakarta.validation.constraints.Size;
 @Data
 public class RegisterRequest {
 
+    @NotBlank(message = "El username no puede estar vacío")
+    private String username;
+
     @NotBlank(message = "El nombre no puede estar vacío")
     private String nombre;
+
+    @NotBlank(message = "El apellido no puede estar vacío")
+    private String apellido;
 
     @Email(message = "El formato del email no es válido")
     @NotBlank(message = "El email no puede estar vacío")
