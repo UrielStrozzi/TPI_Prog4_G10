@@ -217,8 +217,9 @@ function initUsernameCheck() {
 
     usernameDebounceTimer = setTimeout(async () => {
       status.textContent = "…";
+      // BIEN — endpoint correcto
       const { ok, data } = await apiFetch(
-        `/users/check-username?username=${encodeURIComponent(val)}`
+        `/auth/check-username?username=${encodeURIComponent(val)}`
       );
       if (ok && data?.available === true) {
         status.textContent = "✓ Disponible";
@@ -272,12 +273,10 @@ function initLoginForm() {
 
   if (!form) return;
 
-  // Inline validation on blur
+  // Validación — cambiar Validate.email por Validate.required
+  // porque ahora acepta username también, no solo email
   emailInp.addEventListener("blur", () =>
-    setError(emailInp, emailErr, Validate.email(emailInp.value))
-  );
-  passInp.addEventListener("blur", () =>
-    setError(passInp, passErr, Validate.password(passInp.value))
+    setError(emailInp, emailErr, Validate.required(emailInp.value, "El usuario o email"))
   );
 
   form.addEventListener("submit", async (e) => {
@@ -286,19 +285,17 @@ function initLoginForm() {
     hideAlert(serverOk);
 
     // Client-side validation
-    const emailError = Validate.email(emailInp.value);
-    const passError  = Validate.password(passInp.value);
-    setError(emailInp, emailErr, emailError);
-    setError(passInp,  passErr,  passError);
-    if (emailError || passError) return;
+    const loginError = Validate.required(emailInp.value, "El usuario o email");
+    const passError = Validate.password(passInp.value);
+    setError(emailInp, emailErr, loginError);
+    setError(passInp, passErr, passError);
+    if (loginError || passError) return;
 
-    // Build payload
+    // Build payload — "login" coincide con LoginRequest.java
     const payload = {
-      email:    emailInp.value.trim().toLowerCase(),
+      login: emailInp.value.trim(),   // no toLowerCase — username puede tener mayúsculas
       password: passInp.value,
     };
-
-    setLoading(btn, true);
 
     /* ── Llamada al backend ──
      * POST /api/auth/login
@@ -401,11 +398,11 @@ function initRegisterForm() {
 
     // Build payload
     const payload = {
-      firstName: nombreInp.value.trim(),
-      lastName:  apellInp.value.trim(),
-      username:  userInp.value.trim(),
-      email:     emailInp.value.trim().toLowerCase(),
-      password:  passInp.value,
+      nombre: nombreInp.value.trim(),
+      apellido: apellInp.value.trim(),
+      username: userInp.value.trim(),
+      email: emailInp.value.trim().toLowerCase(),
+      password: passInp.value,
     };
 
     setLoading(btn, true);
@@ -417,7 +414,7 @@ function initRegisterForm() {
      * Respuesta 409 (conflicto): { message: "El email ya está registrado" }
      * Respuesta 400 (validación): { message: string, errors?: { field: string }[] }
      */
-    const { ok, status, data } = await apiFetch("/auth/register", {
+    const { ok, status, data } = await apiFetch("/auth/registro", {
       method: "POST",
       body: JSON.stringify(payload),
     });

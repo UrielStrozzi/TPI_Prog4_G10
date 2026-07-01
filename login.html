@@ -97,22 +97,22 @@
 
           <form id="loginForm" class="auth-form" novalidate>
 
-            <div class="field-group">
-              <label class="field-label" for="login-email">Correo electrónico</label>
-              <div class="field-wrap">
-                <span class="field-icon" aria-hidden="true">✉</span>
-                <input
-                  type="email"
-                  id="login-email"
-                  name="email"
-                  class="field-input"
-                  placeholder="usuario@correo.com"
-                  autocomplete="email"
-                  required
-                />
-              </div>
-              <span class="field-error" id="login-email-error" role="alert"></span>
+          <div class="field-group">
+            <label class="field-label" for="login-email">Correo electrónico o Username</label>
+            <div class="field-wrap">
+              <span class="field-icon" aria-hidden="true">👤</span>
+              <input
+                type="text"
+                id="login-email"
+                name="login"
+                class="field-input"
+                placeholder="usuario o correo@ejemplo.com"
+                autocomplete="username"
+                required
+              />
             </div>
+            <span class="field-error" id="login-email-error" role="alert"></span>
+          </div>
 
             <div class="field-group">
               <label class="field-label" for="login-password">Contraseña</label>
