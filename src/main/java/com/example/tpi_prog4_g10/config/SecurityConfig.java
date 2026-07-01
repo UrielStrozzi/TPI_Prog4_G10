@@ -15,13 +15,18 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
 
     @Autowired
-    private AuthTokenFilter authTokenFilter; // antes: jwtAuthFilter
+    private AuthTokenFilter authTokenFilter;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -33,25 +38,39 @@ public class SecurityConfig {
         return authConfig.getAuthenticationManager();
     }
 
+    // ── CORS ─────────────────────────────────────────────────
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+
+        // Orígenes permitidos — agregá los que uses
+        config.setAllowedOrigins(List.of(
+                "http://127.0.0.1:5500", // Live Server VS Code
+                "http://localhost:5500" // Live Server alternativo
+        ));
+
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
+        config.setAllowCredentials(true);
+        config.setMaxAge(3600L); // cache del preflight 1 hora
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config); // aplica a todos los endpoints
+        return source;
+    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                
-            // ── Públicos ──────────────────────────────────────
-            .requestMatchers("/api/auth/**").permitAll()
-            .requestMatchers("/api/auth/login").permitAll()
-            .requestMatchers(HttpMethod.GET, "/api/subastas/**").permitAll()
+        http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ← AGREGADO
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/subastas/**").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .anyRequest().authenticated());
 
-            // ── Por rol ───────────────────────────────────────
-            .requestMatchers("/api/admin/**").hasRole("ADMIN")
-
-            // ── El resto requiere autenticación ───────────────
-            .anyRequest().authenticated()
-        );
-
-        
         http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

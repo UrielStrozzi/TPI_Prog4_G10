@@ -120,4 +120,8 @@ public class UsuarioService {
         }
         return dto;
     }
+
+    public boolean existeUsername(String username) {
+        return usuarioRepository.existsByUsername(username);
+    }
 }
