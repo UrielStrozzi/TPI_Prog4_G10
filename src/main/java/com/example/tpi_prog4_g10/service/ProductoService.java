@@ -30,6 +30,8 @@ public class ProductoService {
 
     
     public void eliminar(Long id) {
-        productoRepository.deleteById(id);
+        Producto producto = obtenerPorId(id);
+        producto.eliminar(); // setea deletedAt = Instant.now()
+        productoRepository.save(producto);
     }
 }

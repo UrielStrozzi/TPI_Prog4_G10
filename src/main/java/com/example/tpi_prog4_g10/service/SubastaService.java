@@ -15,21 +15,32 @@ public class SubastaService {
 
     
     public Subasta crearSubasta(Subasta subasta) {
-        
-        if (subasta.getFechaCierre() == null || subasta.getFechaInicio() == null) {
-            throw new RuntimeException("Error: Las fechas de inicio y fin son obligatorias.");
-        }
-        
-        
-        if (!subasta.getFechaCierre().isAfter(subasta.getFechaInicio())) {
-            throw new RuntimeException("Error: La fecha de cierre debe ser posterior a la fecha de inicio.");
+
+        if (subasta.getProducto() == null) {
+            throw new RuntimeException("La subasta debe tener un producto.");
         }
 
-        subasta.setEstado(EstadoSubasta.BORRADOR); 
+        if (subasta.getVendedor() == null) {
+            subasta.setVendedor(subasta.getProducto().getVendedor());
+        }
+
+        if (subasta.getFechaCierre() == null
+                || subasta.getFechaInicio() == null) {
+            throw new RuntimeException(
+                    "Las fechas de inicio y fin son obligatorias.");
+        }
+
+        if (!subasta.getFechaCierre()
+                .isAfter(subasta.getFechaInicio())) {
+            throw new RuntimeException(
+                    "La fecha de cierre debe ser posterior a la fecha de inicio.");
+        }
+
+        subasta.setEstado(EstadoSubasta.BORRADOR);
+
         return subastaRepository.save(subasta);
     }
 
-    
     public Subasta publicarSubasta(Long id) {
         Subasta subasta = obtenerPorId(id);
         

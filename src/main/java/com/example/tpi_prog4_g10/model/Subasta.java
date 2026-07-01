@@ -8,6 +8,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "subastas", indexes = {
@@ -46,6 +48,10 @@ public class Subasta {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cancelado_por_id")
     private Usuario canceladoPor;
+
+    @OneToMany(mappedBy = "subasta", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<Puja> pujas = new ArrayList<>();
 
     // ── Configuración ─────────────────────────────────────────
     @Column(name = "precio_base", nullable = false, precision = 15, scale = 2)
@@ -101,8 +107,12 @@ public class Subasta {
                 && Instant.now().isBefore(this.fechaCierre);
     }
 
-    public boolean tienePujas() {
+    public boolean tienePujasMonto() {
         return this.montoActual != null;
+    }
+
+    public boolean tienePujas() {
+        return pujas != null && !pujas.isEmpty();
     }
 
     public void cancelar(String motivo, Usuario responsable) {
@@ -117,5 +127,9 @@ public class Subasta {
         this.ganador = ganador;
         this.precioFinal = this.montoActual;
         this.fechaAdjudicacion = Instant.now();
+    }
+
+    public void registrarPuja(BigDecimal monto) {
+        this.montoActual = monto;
     }
 }

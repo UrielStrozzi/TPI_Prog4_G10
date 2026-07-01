@@ -59,4 +59,11 @@ public class Puja {
     public boolean estaConfirmada() {
         return this.estado == EstadoPuja.CONFIRMADA;
     }
+
+    @PrePersist
+    public void prePersist() {
+        if (fechaHora == null) {
+            fechaHora = Instant.now();
+        }
+    }
 }

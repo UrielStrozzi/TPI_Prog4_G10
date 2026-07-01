@@ -32,10 +32,11 @@ public class SubastaController {
 
         Subasta subasta = Subasta.builder()
                 .producto(producto)
+                .vendedor(producto.getVendedor())
                 .precioBase(request.getPrecioBase())
                 .incrementoMinimo(request.getIncrementoMinimo())
                 .fechaInicio(request.getFechaInicio())
-                .fechaCierre(request.getFechaFin())
+                .fechaCierre(request.getFechaCierre())
                 .build();
 
         Subasta nuevaSubasta = subastaService.crearSubasta(subasta);

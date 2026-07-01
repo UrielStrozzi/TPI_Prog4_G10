@@ -54,20 +54,19 @@ public class PujaService {
 
         
         BigDecimal montoMinimoRequerido;
-        
-        
+
         if (subasta.getMontoActual() == null) {
             montoMinimoRequerido = subasta.getPrecioBase();
         } else {
-            
-            montoMinimoRequerido = subasta.getMontoActual().add(new BigDecimal("1.00")); 
+            montoMinimoRequerido = subasta.getMontoActual()
+                    .add(subasta.getIncrementoMinimo());
         }
 
         if (montoOfrecido.compareTo(montoMinimoRequerido) < 0) {
-            throw new RuntimeException("Error: El monto ofrecido debe ser mayor o igual a " + montoMinimoRequerido);
+            throw new RuntimeException(
+                    "La puja debe ser de al menos $" + montoMinimoRequerido);
         }
 
-        
         Puja nuevaPuja = Puja.builder()
                 .subasta(subasta)
                 .usuario(usuario)
@@ -78,13 +77,10 @@ public class PujaService {
         pujaRepository.save(nuevaPuja);
 
         
-        subasta.setMontoActual(montoOfrecido);
-        subasta.setGanador(usuario);
+        subasta.registrarPuja(montoOfrecido);
         subastaRepository.save(subasta);
-
         return nuevaPuja;
     }
-    
     
     public List<Puja> obtenerPujasPorUsuario(Long usuarioId) {
         
