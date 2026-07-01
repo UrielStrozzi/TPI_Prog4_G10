@@ -7,10 +7,13 @@ import com.example.tpi_prog4_g10.model.Producto;
 import com.example.tpi_prog4_g10.model.Subasta;
 import com.example.tpi_prog4_g10.service.ProductoService;
 import com.example.tpi_prog4_g10.service.SubastaService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,7 +53,22 @@ public class SubastaController {
         return ResponseEntity.ok(convertirADto(subastaPublicada));
     }
 
-    
+    @PostMapping("/{id}/cancelar")
+    @PreAuthorize("hasRole('SELLER') or hasRole('ADMIN')")
+    public ResponseEntity<SubastaResponse> cancelar(
+        
+            @PathVariable Long id,
+            @RequestParam(required = false) String motivo,
+            Authentication authentication) {
+
+        boolean esAdmin = authentication.getAuthorities().stream()
+            .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        System.out.println("Roles del usuario: " + authentication.getAuthorities());
+        System.out.println("Es admin: " + esAdmin);
+        Subasta subastaCancelada = subastaService.cancelarSubasta(id, motivo, authentication.getName(), esAdmin);
+        return ResponseEntity.ok(convertirADto(subastaCancelada));
+    }
+
     @GetMapping
     public ResponseEntity<List<SubastaResponse>> obtenerTodas() {
         List<SubastaResponse> respuestas = subastaService.obtenerTodas().stream()

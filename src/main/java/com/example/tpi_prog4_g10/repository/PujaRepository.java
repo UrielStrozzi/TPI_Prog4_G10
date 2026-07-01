@@ -17,7 +17,7 @@ public interface PujaRepository extends JpaRepository<Puja, Long> {
 
     List<Puja> findBySubastaOrderByFechaHoraDesc(Subasta subasta);
 
-    boolean existsBySubasta(Subasta subasta);
+    boolean existsBySubastaId(Long subastaId);
 
     long countBySubasta(Subasta subasta);
 

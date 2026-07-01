@@ -15,9 +15,11 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 
+@Slf4j
 @Component
 public class AuthTokenFilter extends OncePerRequestFilter {
 
@@ -43,9 +45,9 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
-        } catch (Exception e) {
-            
-        }
+            } catch (Exception e) {
+                log.error("No se pudo autenticar al usuario: {}", e.getMessage());
+            }
 
         filterChain.doFilter(request, response);
     }
