@@ -24,11 +24,11 @@ const API_CONFIG = {
 
 // ─── TOKEN JWT ───────────────────────────────────────────────
 const Auth = {
-  getToken()         { return localStorage.getItem('sb_token'); },
-  setToken(t)        { localStorage.setItem('sb_token', t); },
-  removeToken()      { localStorage.removeItem('sb_token'); },
-  getUser()          { return JSON.parse(localStorage.getItem('sb_user') || 'null'); },
-  setUser(u)         { localStorage.setItem('sb_user', JSON.stringify(u)); },
+  getToken()         { return localStorage.getItem('auth_token'); },
+  setToken(t)        { localStorage.setItem('auth_token', t); },
+  removeToken()      { localStorage.removeItem('auth_token'); },
+  getUser()          { return JSON.parse(localStorage.getItem('auth_user') || 'null'); },
+  setUser(u)         { localStorage.setItem('auth_user', JSON.stringify(u)); },
   isLoggedIn()       { return !!this.getToken(); },
   hasRole(role)      { const u = this.getUser(); return u?.roles?.includes(role); },
 };
@@ -162,8 +162,9 @@ const AuthService = {
   },
 
   logout() {
-    Auth.removeToken();
-    localStorage.removeItem('sb_user');
+    Auth.removeToken();                  // Borra 'auth_token'
+    localStorage.removeItem('auth_user'); // Borra 'auth_user' de raíz
+    window.location.replace('login.html'); // Te saca derecho al login
   },
 };
 
