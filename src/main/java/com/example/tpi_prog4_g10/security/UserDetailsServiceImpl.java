@@ -11,7 +11,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
-import java.util.Optional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,7 +36,7 @@ public UserDetails loadUserByUsername(String login) throws UsernameNotFoundExcep
             .collect(Collectors.toList());
 
     return new org.springframework.security.core.userdetails.User(
-            usuario.getUsername(),
+            usuario.getEmail(),
             usuario.getPasswordHash(),
             !usuario.estaEliminado(),
             true,

@@ -1,11 +1,13 @@
 package com.example.tpi_prog4_g10.service;
 
 import com.example.tpi_prog4_g10.model.Subasta;
+import com.example.tpi_prog4_g10.model.Usuario;
 import com.example.tpi_prog4_g10.enums.EstadoSubasta;
 import com.example.tpi_prog4_g10.repository.SubastaRepository;
 import com.example.tpi_prog4_g10.repository.PujaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.example.tpi_prog4_g10.repository.UsuarioRepository;
 
 import java.time.Instant;
 import java.util.List;
@@ -15,7 +17,12 @@ public class SubastaService {
 
     @Autowired
     private SubastaRepository subastaRepository;
+
+    @Autowired
     private PujaRepository pujaRepository;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     
     public Subasta crearSubasta(Subasta subasta) {
@@ -105,6 +112,12 @@ public class SubastaService {
         }
 
         subasta.setFechaCancelacion(Instant.now());
+
+        Usuario solicitante = usuarioRepository.findByEmail(emailSolicitante)
+            .or(() -> usuarioRepository.findByUsername(emailSolicitante))
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        subasta.setCanceladoPor(solicitante);
+
         return subastaRepository.save(subasta);
     }
 

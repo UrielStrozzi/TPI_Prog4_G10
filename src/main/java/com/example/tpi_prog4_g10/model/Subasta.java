@@ -101,6 +101,10 @@ public class Subasta {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    @Version
+    @Column(nullable = false)
+    private Long version = 0L;
+
     // ── Métodos de dominio ────────────────────────────────────
     public boolean estaActiva() {
         return this.estado == EstadoSubasta.ACTIVA

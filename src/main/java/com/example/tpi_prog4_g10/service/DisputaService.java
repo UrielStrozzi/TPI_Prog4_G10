@@ -5,7 +5,6 @@ import java.time.Instant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.tpi_prog4_g10.enums.EstadoSubasta;
 import com.example.tpi_prog4_g10.model.Disputa;
 import com.example.tpi_prog4_g10.model.Subasta;
 import com.example.tpi_prog4_g10.model.Usuario;
@@ -82,8 +81,10 @@ public class DisputaService {
             throw new RuntimeException("La disputa ya fue resuelta.");
         }
 
-        Usuario admin = usuarioRepository.findByUsername(adminUsername)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado."));
+        // busca por email o username
+        Usuario admin = usuarioRepository.findByEmail(adminUsername)
+        .or(() -> usuarioRepository.findByUsername(adminUsername))
+        .orElseThrow(() -> new RuntimeException("Usuario no encontrado."));
 
         // Resolver la disputa
         disputa.setResolucion(resolucion);
