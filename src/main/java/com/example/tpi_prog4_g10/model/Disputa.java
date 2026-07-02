@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
 
+import com.example.tpi_prog4_g10.enums.EstadoDisputa;
+
 @Entity
 @Table(name = "disputas")
 @Getter
@@ -33,6 +35,14 @@ public class Disputa {
 
     @Column(columnDefinition = "TEXT")
     private String resolucion;
+
+    @Column(columnDefinition = "TEXT")
+    private String descripcion;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private EstadoDisputa estado = EstadoDisputa.ABIERTA;
 
     @Column(name = "fecha_resolucion")
     private Instant fechaResolucion;

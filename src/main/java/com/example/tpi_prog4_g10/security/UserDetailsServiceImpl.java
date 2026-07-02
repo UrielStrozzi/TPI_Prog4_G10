@@ -25,27 +25,25 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
 @Override
 public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
-    
     log.info("Buscando usuario con login: {}", login);
-    
-    Optional<Usuario> porEmail = usuarioRepository.findByEmail(login);
-    log.info("Por email encontrado: {}", porEmail.isPresent());
-    
-    Optional<Usuario> porUsername = usuarioRepository.findByUsername(login);
-    log.info("Por username encontrado: {}", porUsername.isPresent());
 
-    Usuario usuario = porEmail
-        .or(() -> porUsername)
-        .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + login));
+    Usuario usuario = usuarioRepository.findByEmail(login)
+            .or(() -> usuarioRepository.findByUsername(login))
+            .orElseThrow(() -> new UsernameNotFoundException(
+                    "Usuario no encontrado: " + login));
 
-        List<GrantedAuthority> authorities = usuario.getRoles().stream()
-        .map(rol -> new SimpleGrantedAuthority("ROLE_" + rol.getNombre().name()))
-        .collect(Collectors.toList());
+    List<GrantedAuthority> authorities = usuario.getRoles().stream()
+            .map(rol -> new SimpleGrantedAuthority("ROLE_" + rol.getNombre().name()))
+            .collect(Collectors.toList());
 
     return new org.springframework.security.core.userdetails.User(
-        usuario.getEmail(),
-        usuario.getPasswordHash(),
-        authorities
+            usuario.getUsername(),
+            usuario.getPasswordHash(),
+            !usuario.estaEliminado(),
+            true,
+            true,
+            !usuario.isBloqueado(),
+            authorities
     );
 }
 }

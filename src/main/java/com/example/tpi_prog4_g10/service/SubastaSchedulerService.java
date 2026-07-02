@@ -20,6 +20,8 @@ public class SubastaSchedulerService {
 
     @Autowired
     private SubastaRepository subastaRepository;
+
+    @Autowired
     private PujaRepository pujaRepository;
 
     @Scheduled(fixedDelay = 30000)

@@ -30,60 +30,53 @@ public class PujaService {
     
     @Transactional
     public Puja registrarPuja(Long subastaId, Long usuarioId, BigDecimal montoOfrecido) {
-        
-        Subasta subasta = subastaRepository.findById(subastaId)
+
+        // Bloqueo pesimista — evita condición de carrera entre pujas simultáneas
+        Subasta subasta = subastaRepository.findByIdWithLock(subastaId)
                 .orElseThrow(() -> new RuntimeException("Error: Subasta no encontrada."));
-        
+
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RuntimeException("Error: Usuario no encontrado."));
 
-        
+        // ── Validaciones ──────────────────────────────────────
         if (subasta.getEstado() != EstadoSubasta.ACTIVA) {
             throw new RuntimeException("Error: Solo se puede pujar en subastas ACTIVAS.");
         }
 
-        
         if (Instant.now().isAfter(subasta.getFechaCierre())) {
             throw new RuntimeException("Error: La subasta ya ha cerrado.");
         }
 
-        
-        if (subasta.getProducto().getVendedor().getId().equals(usuario.getId())) {
+        if (usuario.isBloqueado()) {
+            throw new RuntimeException("Error: Tu cuenta está bloqueada y no podés realizar pujas.");
+        }
+
+        if (subasta.getVendedor().getId().equals(usuario.getId())) {
             throw new RuntimeException("Error: El vendedor no puede pujar en su propia subasta.");
         }
 
-        
-        BigDecimal montoMinimoRequerido;
+        // ── Monto mínimo ──────────────────────────────────────
+        BigDecimal montoMinimo = subasta.getMontoActual() == null
+                ? subasta.getPrecioBase()
+                : subasta.getMontoActual().add(subasta.getIncrementoMinimo());
 
-        if (subasta.getMontoActual() == null) {
-            montoMinimoRequerido = subasta.getPrecioBase();
-        } else {
-            montoMinimoRequerido = subasta.getMontoActual()
-                    .add(subasta.getIncrementoMinimo());
+        if (montoOfrecido.compareTo(montoMinimo) < 0) {
+            throw new RuntimeException("La puja debe ser de al menos $" + montoMinimo);
         }
 
-        if (montoOfrecido.compareTo(montoMinimoRequerido) < 0) {
-            throw new RuntimeException(
-                    "La puja debe ser de al menos $" + montoMinimoRequerido);
-        }
-
+        // ── Registrar puja ────────────────────────────────────
         Puja nuevaPuja = Puja.builder()
                 .subasta(subasta)
                 .usuario(usuario)
                 .monto(montoOfrecido)
-                .fechaHora(Instant.now())
-                .build();
-        
+                .build(); // fechaHora la pone @CreationTimestamp
+
         pujaRepository.save(nuevaPuja);
 
-        
-        subasta.registrarPuja(montoOfrecido);
+        subasta.setMontoActual(montoOfrecido);
+        subasta.setGanador(usuario);
         subastaRepository.save(subasta);
+
         return nuevaPuja;
-    }
-    
-    public List<Puja> obtenerPujasPorUsuario(Long usuarioId) {
-        
-        return null; 
     }
 }
