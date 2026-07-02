@@ -180,7 +180,7 @@ CREATE TABLE `productos` (
   KEY `idx_productos_deleted_at` (`deleted_at`),
   CONSTRAINT `fk_productos_categoria` FOREIGN KEY (`categoria_id`) REFERENCES `categorias` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `fk_productos_vendedor` FOREIGN KEY (`vendedor_id`) REFERENCES `usuarios` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Productos publicables en subastas. Escalar con imágenes, atributos, etc.';
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Productos publicables en subastas. Escalar con imágenes, atributos, etc.';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -189,7 +189,7 @@ CREATE TABLE `productos` (
 
 LOCK TABLES `productos` WRITE;
 /*!40000 ALTER TABLE `productos` DISABLE KEYS */;
-INSERT INTO `productos` VALUES (1,2,1,'MacBook Pro 14 M3 — Precio actualizado','Batería al 95%. Incluye cargador original.','USADO','2026-06-30 23:02:09.000','2026-06-30 22:49:28.000','2026-06-30 23:02:09.000');
+INSERT INTO `productos` VALUES (1,2,1,'MacBook Pro 14 M3 — Precio actualizado','Batería al 95%. Incluye cargador original.','USADO','2026-06-30 23:02:09.000','2026-06-30 22:49:28.000','2026-06-30 23:02:09.000'),(2,2,1,'Ipgone Pro 14 Max','Excelente estado. 4GB RAM, 512GB SSD. Caja original.','USADO',NULL,'2026-07-02 01:09:02.000','2026-07-02 01:09:02.000');
 /*!40000 ALTER TABLE `productos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -215,7 +215,7 @@ CREATE TABLE `pujas` (
   CONSTRAINT `fk_pujas_subasta` FOREIGN KEY (`subasta_id`) REFERENCES `subastas` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `fk_pujas_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `chk_pujas_monto` CHECK (`monto` > 0)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Pujas registradas. Las operaciones de INSERT son siempre transaccionales con bloqueo.';
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Pujas registradas. Las operaciones de INSERT son siempre transaccionales con bloqueo.';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -224,6 +224,7 @@ CREATE TABLE `pujas` (
 
 LOCK TABLES `pujas` WRITE;
 /*!40000 ALTER TABLE `pujas` DISABLE KEYS */;
+INSERT INTO `pujas` VALUES (1,2,3,155000.00,'2026-07-02 01:39:01.000','CONFIRMADA',NULL),(2,2,3,158000.00,'2026-07-02 01:41:04.000','CONFIRMADA',NULL);
 /*!40000 ALTER TABLE `pujas` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -296,7 +297,7 @@ CREATE TABLE `subastas` (
   CONSTRAINT `chk_subastas_fechas` CHECK (`fecha_cierre` > `fecha_inicio`),
   CONSTRAINT `chk_subastas_precio_base` CHECK (`precio_base` > 0),
   CONSTRAINT `chk_subastas_incremento` CHECK (`incremento_minimo` > 0)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Subastas. monto_actual y ganador_id se actualizan en cada puja transaccional.';
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Subastas. monto_actual y ganador_id se actualizan en cada puja transaccional.';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -305,7 +306,7 @@ CREATE TABLE `subastas` (
 
 LOCK TABLES `subastas` WRITE;
 /*!40000 ALTER TABLE `subastas` DISABLE KEYS */;
-INSERT INTO `subastas` VALUES (1,1,2,150000.00,5000.00,NULL,'2025-06-28 21:00:00.000','2025-06-28 21:05:00.000','BORRADOR',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2026-07-01 01:20:48.000','2026-07-01 01:20:48.000');
+INSERT INTO `subastas` VALUES (1,1,2,150000.00,5000.00,NULL,'2025-06-28 21:00:00.000','2025-06-28 21:05:00.000','BORRADOR',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2026-07-01 01:20:48.000','2026-07-01 01:20:48.000'),(2,2,2,100000.00,3000.00,NULL,'2026-07-02 01:33:00.000','2026-07-02 01:48:37.000','ADJUDICADA',158000.00,3,'2026-07-02 01:48:53.000',158000.00,NULL,NULL,NULL,'2026-07-02 01:10:59.000','2026-07-02 01:48:53.000');
 /*!40000 ALTER TABLE `subastas` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -336,7 +337,7 @@ CREATE TABLE `usuario_roles` (
 
 LOCK TABLES `usuario_roles` WRITE;
 /*!40000 ALTER TABLE `usuario_roles` DISABLE KEYS */;
-INSERT INTO `usuario_roles` VALUES (1,1,'2026-06-29 14:49:57.513',NULL),(1,3,'2026-06-29 22:26:05.350',NULL),(2,1,'2026-06-30 19:23:48.066',NULL),(2,2,'2026-06-30 19:23:48.065',NULL),(3,1,'2026-06-29 14:55:08.576',NULL);
+INSERT INTO `usuario_roles` VALUES (1,1,'2026-06-29 14:49:57.513',NULL),(1,3,'2026-06-29 22:26:05.350',NULL),(2,1,'2026-06-30 19:23:48.066',NULL),(2,2,'2026-06-30 19:23:48.065',NULL),(3,1,'2026-06-29 14:55:08.576',NULL),(4,1,'2026-07-01 20:36:59.143',NULL);
 /*!40000 ALTER TABLE `usuario_roles` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -371,7 +372,7 @@ CREATE TABLE `usuarios` (
   KEY `idx_usuarios_bloqueado` (`bloqueado`),
   KEY `idx_usuarios_deleted_at` (`deleted_at`),
   CONSTRAINT `fk_usuarios_bloqueado_por` FOREIGN KEY (`bloqueado_por`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Usuarios del sistema. Escalar con columnas extra sin romper estructura.';
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Usuarios del sistema. Escalar con columnas extra sin romper estructura.';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -380,7 +381,7 @@ CREATE TABLE `usuarios` (
 
 LOCK TABLES `usuarios` WRITE;
 /*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
-INSERT INTO `usuarios` VALUES (1,'admin_root','admin@subastas.com','$2a$10$tV1x8Gj0i/QpYeKIUaHPr.ejm1/fUaPNLxeK4xoRAqr8mzQ.dvUz2','Admin','Sistema',NULL,0,NULL,NULL,NULL,NULL,'2026-06-29 17:49:57.000','2026-06-29 17:49:57.000'),(2,'seller_root','seller@subastas.com','$2a$10$t3cG2aUl35Gw8bP0ROdJmuuhJWYUmJ1i8mbEluPpbjRRsVQ7djQdm','Seller','Sistema',NULL,0,NULL,NULL,NULL,NULL,'2026-06-29 17:54:55.000','2026-06-30 22:23:48.000'),(3,'user_root','user@subastas.com','$2a$10$eNJx/acK3QFxEZ04lAz6h./JpvQRP1dYm5XFii2mX0d2zeveLI.66','User','Sistema',NULL,0,NULL,NULL,NULL,NULL,'2026-06-29 17:55:08.000','2026-06-30 22:32:02.000');
+INSERT INTO `usuarios` VALUES (1,'admin_root','admin@subastas.com','$2a$10$tV1x8Gj0i/QpYeKIUaHPr.ejm1/fUaPNLxeK4xoRAqr8mzQ.dvUz2','Admin','Sistema',NULL,0,NULL,NULL,NULL,NULL,'2026-06-29 17:49:57.000','2026-06-29 17:49:57.000'),(2,'seller_root','seller@subastas.com','$2a$10$t3cG2aUl35Gw8bP0ROdJmuuhJWYUmJ1i8mbEluPpbjRRsVQ7djQdm','Seller','Sistema',NULL,0,NULL,NULL,NULL,NULL,'2026-06-29 17:54:55.000','2026-06-30 22:23:48.000'),(3,'user_root','user@subastas.com','$2a$10$eNJx/acK3QFxEZ04lAz6h./JpvQRP1dYm5XFii2mX0d2zeveLI.66','User','Sistema',NULL,0,NULL,NULL,NULL,NULL,'2026-06-29 17:55:08.000','2026-06-30 22:32:02.000'),(4,'uri12','urielstrozzi@gmail.com','$2a$10$vHR.qsMNXF5/slJz9gk7duk5emSTBew7JHnObQ.mm1Ii0SAEzMbbe','Uriel','Strozzi',NULL,0,NULL,NULL,NULL,NULL,'2026-07-01 23:36:59.000','2026-07-01 23:36:59.000');
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -480,4 +481,4 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-06-30 22:29:17
+-- Dump completed on 2026-07-01 23:26:54
