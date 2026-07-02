@@ -20,8 +20,8 @@
 /* ── Configuración global ─────────────────────────────── */
 const CONFIG = {
   API_BASE_URL: "http://localhost:8080/api",   // ← ajustá a tu servidor
-  TOKEN_KEY:    "auth_token",
-  USER_KEY:     "auth_user",
+  TOKEN_KEY:    "sb_token",
+  USER_KEY:     "sb_user",
   REDIRECT_AFTER_LOGIN:    "/index.html",
   REDIRECT_AFTER_REGISTER: null, // null = auto-login y redirige
 };
