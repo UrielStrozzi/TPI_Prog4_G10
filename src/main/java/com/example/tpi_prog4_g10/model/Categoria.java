@@ -2,7 +2,11 @@ package com.example.tpi_prog4_g10.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Data
 @Entity
@@ -23,6 +27,7 @@ public class Categoria {
 
     private String descripcion;
     
-    @OneToMany(mappedBy = "categoria", cascade = CascadeType.ALL)
-    private List<Producto> productos;
+    @OneToMany(mappedBy = "categoria", fetch = FetchType.LAZY)
+    @JsonIgnore  // ← corta la recursión
+    private List<Producto> productos = new ArrayList<>();
 }

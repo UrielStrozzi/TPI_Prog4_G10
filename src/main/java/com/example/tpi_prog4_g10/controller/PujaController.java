@@ -3,7 +3,11 @@ package com.example.tpi_prog4_g10.controller;
 import com.example.tpi_prog4_g10.dto.request.PujaRequest;
 import com.example.tpi_prog4_g10.dto.request.response.MensajeResponse;
 import com.example.tpi_prog4_g10.service.PujaService;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,17 +15,20 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import com.example.tpi_prog4_g10.repository.UsuarioRepository;
+import com.example.tpi_prog4_g10.repository.VMisPujasRepository;
 import com.example.tpi_prog4_g10.model.Usuario;
+import com.example.tpi_prog4_g10.model.VMisPujas;
+import org.springframework.security.core.Authentication;
 
 @RestController
-@RequestMapping("/api/subastas")
+@RequestMapping("/api/pujas")
+@RequiredArgsConstructor
 public class PujaController {
 
-    @Autowired
-    private PujaService pujaService;
+    private final PujaService pujaService;
+    private final UsuarioRepository usuarioRepository;
+    private final VMisPujasRepository vMisPujasRepository;
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
 
     @PostMapping("/{subastaId}/pujas")
     @PreAuthorize("hasRole('USER')")
@@ -39,4 +46,16 @@ public class PujaController {
                 new MensajeResponse("¡Puja registrada con éxito! Sos el máximo postor."),
                 HttpStatus.CREATED);
     }
+
+    @GetMapping("/mias")
+        @PreAuthorize("isAuthenticated()")
+        public ResponseEntity<List<VMisPujas>> misPujas(Authentication authentication) {
+                
+        Usuario usuario = usuarioRepository.findByEmail(authentication.getName())
+                .or(() -> usuarioRepository.findByUsername(authentication.getName()))
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        System.out.println("Usuario id: " + usuario.getId());
+        System.out.println("Username: " + authentication.getName());
+        return ResponseEntity.ok(pujaService.obtenerMisPujas(usuario.getId()));
+        }
 }

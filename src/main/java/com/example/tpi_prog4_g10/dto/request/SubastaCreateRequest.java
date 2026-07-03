@@ -1,12 +1,10 @@
 package com.example.tpi_prog4_g10.dto.request;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import java.math.BigDecimal;
 import java.time.Instant;
 
-@Getter
-@Setter
+@Data
 public class SubastaCreateRequest {
     private Long productoId;
     private BigDecimal precioBase;

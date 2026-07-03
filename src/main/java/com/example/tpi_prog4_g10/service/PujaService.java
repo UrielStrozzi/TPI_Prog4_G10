@@ -3,10 +3,12 @@ package com.example.tpi_prog4_g10.service;
 import com.example.tpi_prog4_g10.model.Puja;
 import com.example.tpi_prog4_g10.model.Subasta;
 import com.example.tpi_prog4_g10.model.Usuario;
+import com.example.tpi_prog4_g10.model.VMisPujas;
 import com.example.tpi_prog4_g10.enums.EstadoSubasta;
 import com.example.tpi_prog4_g10.repository.PujaRepository;
 import com.example.tpi_prog4_g10.repository.SubastaRepository;
 import com.example.tpi_prog4_g10.repository.UsuarioRepository;
+import com.example.tpi_prog4_g10.repository.VMisPujasRepository;
 
 import jakarta.persistence.OptimisticLockException;
 
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 
 @Service
 public class PujaService {
@@ -28,6 +31,9 @@ public class PujaService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private VMisPujasRepository vMisPujasRepository;
 
     
     @Transactional
@@ -85,4 +91,8 @@ public class PujaService {
             throw new RuntimeException("Otra puja fue registrada al mismo tiempo, intentá de nuevo");
         }
     }
+
+    public List<VMisPujas> obtenerMisPujas(Long usuarioId) {
+    return vMisPujasRepository.findByUsuarioId(usuarioId);
+}
 }
