@@ -304,38 +304,38 @@ const App = (() => {
           return;
         }
 
-        tbody.innerHTML = this.list.map((s, i) => `
-          <tr>
-            <td class="td-mono">#${s.id}</td>
-            <td class="td-title" title="${s.productoTitulo}">${s.productoTitulo}</td>
-            <td>${UI.estadoBadge(s.estado)}</td>
-            <td class="td-money">${UI.fmt.money(s.montoActual ?? s.precioBase)}</td>
-            <td class="text-mono text-secondary text-sm">${s.totalPujas ?? 0}</td>
-            <td>${s.estado === 'ACTIVA'
-              ? `<span id="timer-${s.id}" class="live-timer">...</span>`
-              : `<span class="text-muted text-sm">${UI.fmt.date(s.fechaCierre)}</span>`}
-            </td>
-            <td class="text-muted text-sm">${s.vendedorUsername}</td>
-            <td>
-              <div class="td-actions">
-                ${s.estado === 'BORRADOR'
-                  ? `<button class="btn btn-success btn-sm" onclick="App.Subastas.publicar(${s.id})">Publicar</button>`
-                  : ''}
-                <button class="btn btn-ghost btn-sm btn-icon" title="Ver pujas" onclick="App.Pujas.showForSubasta(${s.id}, '${s.productoTitulo.replace(/'/g,"\\'")}')">📋</button>
-                <button class="btn btn-ghost btn-sm btn-icon" title="Historial de estados" onclick="App.Subastas.showHistorial(${s.id}, '${s.productoTitulo.replace(/'/g,"\\'")}')">🕐</button>
-                ${(s.estado === 'PUBLICADA' || s.estado === 'ACTIVA' || s.estado === 'BORRADOR')
-                  ? `<button class="btn btn-danger btn-sm btn-icon" title="Cancelar" onclick="App.Subastas.confirmarCancelar(${s.id}, '${s.productoTitulo.replace(/'/g,"\\'")}')">✕</button>`
-                  : ''}
-              </div>
-            </td>
-          </tr>`).join('');
+    tbody.innerHTML = this.list.map((s, i) => `
+      <tr>
+        <td class="td-mono">#${s.id}</td>
+        <td class="td-title" title="${s.productoNombre}">${s.productoNombre}</td>
+        <td>${UI.estadoBadge(s.estado)}</td>
+        <td class="td-money">${UI.fmt.money(s.montoActual ?? s.precioBase)}</td>
+        <td class="text-mono text-secondary text-sm">—</td>
+        <td>${s.estado === 'ACTIVA'
+          ? `<span id="timer-${s.id}" class="live-timer">...</span>`
+          : `<span class="text-muted text-sm">${UI.fmt.date(s.fechaFin)}</span>`}
+        </td>
+        <td class="text-muted text-sm">${s.nombreGanadorParcial ?? '—'}</td>
+        <td>
+          <div class="td-actions">
+            ${s.estado === 'BORRADOR'
+              ? `<button class="btn btn-success btn-sm" onclick="App.Subastas.publicar(${s.id})">Publicar</button>`
+              : ''}
+            <button class="btn btn-ghost btn-sm btn-icon" title="Ver pujas" onclick="App.Pujas.showForSubasta(${s.id}, '${s.productoNombre.replace(/'/g,"\\'")}')">📋</button>
+            <button class="btn btn-ghost btn-sm btn-icon" title="Historial" onclick="App.Subastas.showHistorial(${s.id}, '${s.productoNombre.replace(/'/g,"\\'")}')">🕐</button>
+            ${(s.estado === 'PUBLICADA' || s.estado === 'ACTIVA' || s.estado === 'BORRADOR')
+              ? `<button class="btn btn-danger btn-sm btn-icon" title="Cancelar" onclick="App.Subastas.confirmarCancelar(${s.id}, '${s.productoNombre.replace(/'/g,"\\'")}')">✕</button>`
+              : ''}
+          </div>
+        </td>
+      </tr>`).join('');
 
-        // Iniciar timers para subastas activas
-        this.list.forEach(s => {
-          if (s.estado === 'ACTIVA') {
-            UI.Timers.start(`timer-${s.id}`, s.fechaCierre);
-          }
-        });
+    // Timers para subastas activas
+    this.list.forEach(s => {
+      if (s.estado === 'ACTIVA') {
+        UI.Timers.start(`timer-${s.id}`, s.fechaFin);  // fechaFin → fechaFin
+      }
+    });
 
       } catch(e) {
         tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--text-muted)">Error al cargar subastas</td></tr>`;
@@ -425,7 +425,7 @@ const App = (() => {
             </div>
             <div class="form-group">
               <label class="form-label">Fecha y hora de cierre <span class="required">*</span></label>
-              <input name="fechaCierre" class="form-control" type="datetime-local" value="${toLocal(defaultCierre)}">
+              <input name="fechaFin" class="form-control" type="datetime-local" value="${toLocal(defaultCierre)}">
               <div class="form-error">El cierre debe ser posterior al inicio.</div>
             </div>
           </div>
@@ -452,7 +452,7 @@ const App = (() => {
       const precioBase      = UI.Drawer.getField('precioBase');
       const incrementoMin   = UI.Drawer.getField('incrementoMinimo');
       const fechaInicio     = UI.Drawer.getField('fechaInicio');
-      const fechaCierre     = UI.Drawer.getField('fechaCierre');
+      const fechaFin     = UI.Drawer.getField('fechaFin');
       const descripcion     = UI.Drawer.getField('descripcion');
 
       let valid = true;
@@ -464,8 +464,8 @@ const App = (() => {
       if (errIncr) { UI.Drawer.setFieldError('incrementoMinimo', errIncr); valid = false; }
       const errInicio = UI.Validate.futureDate(fechaInicio, 'Fecha de inicio');
       if (errInicio) { UI.Drawer.setFieldError('fechaInicio', errInicio); valid = false; }
-      const errCierre = UI.Validate.dateAfter(fechaInicio, fechaCierre);
-      if (errCierre) { UI.Drawer.setFieldError('fechaCierre', errCierre); valid = false; }
+      const errCierre = UI.Validate.dateAfter(fechaInicio, fechaFin);
+      if (errCierre) { UI.Drawer.setFieldError('fechaFin', errCierre); valid = false; }
       if (!valid) throw { data: 'Corregí los campos marcados.' };
 
       await API.SubastaService.crear({
@@ -473,7 +473,7 @@ const App = (() => {
         precioBase: parseFloat(precioBase),
         incrementoMinimo: parseFloat(incrementoMin),
         fechaInicio: new Date(fechaInicio).toISOString(),
-        fechaCierre: new Date(fechaCierre).toISOString(),
+        fechaFin: new Date(fechaFin).toISOString(),
       });
 
       UI.Drawer.close();
