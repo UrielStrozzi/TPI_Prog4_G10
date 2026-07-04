@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subastas Online — Panel de Gestión</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════════
+    APP SHELL
+═══════════════════════════════════════════════════════════ -->
+  <div class="app-shell">
+
+    <!-- ── HEADER ─────────────────────────────────────────────── -->
+    <header class="app-header">
+      <a href="#" class="header-logo">
+        <div class="header-logo-icon">🏷️</div>
+        <span class="header-logo-text">Sub<span>astas</span></span>
+      </a>
+
+      <button id="sidebar-toggle" class="btn btn-ghost btn-icon" style="display:none" aria-label="Menú">☰</button>
+
+      <div class="header-search">
+        <span class="header-search-icon">🔍</span>
+        <input type="search" placeholder="Buscar subastas, productos, usuarios...">
+      </div>
+
+      <div class="header-actions">
+        <button class="header-notif-btn" aria-label="Notificaciones">
+          🔔
+          <span class="notif-dot"></span>
+        </button>
+        <div class="header-user">
+          <div class="header-avatar">A</div>
+          <span class="header-username">admin</span>
+          <span style="color:var(--text-muted);font-size:12px;">▾</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ── SIDEBAR ────────────────────────────────────────────── -->
+    <aside class="app-sidebar" id="app-sidebar">
+
+      <span class="sidebar-section-label">Principal</span>
+
+      <a class="sidebar-nav-item active" data-page="page-dashboard">
+        <span class="sidebar-nav-icon">📊</span>
+        Dashboard
+      </a>
+
+      <div class="sidebar-divider"></div>
+      <span class="sidebar-section-label">Catálogo</span>
+
+      <a class="sidebar-nav-item" data-page="page-productos">
+        <span class="sidebar-nav-icon">📦</span>
+        Productos
+      </a>
+
+      <div class="sidebar-divider"></div>
+      <span class="sidebar-section-label">Subastas</span>
+
+      <a class="sidebar-nav-item" data-page="page-subastas">
+        <span class="sidebar-nav-icon">🏷️</span>
+        Todas las subastas
+        <span class="sidebar-badge" id="badge-activas">1</span>
+      </a>
+
+      <a class="sidebar-nav-item" data-page="page-pujas">
+        <span class="sidebar-nav-icon">📋</span>
+        Mis pujas
+      </a>
+
+      <div class="sidebar-divider"></div>
+      <span class="sidebar-section-label">Administración</span>
+
+      <a class="sidebar-nav-item" data-page="page-usuarios">
+        <span class="sidebar-nav-icon">👥</span>
+        Usuarios
+        <span class="sidebar-badge danger" id="badge-bloqueados" style="display:none">!</span>
+      </a>
+
+      <div class="sidebar-divider"></div>
+      <span class="sidebar-section-label">Sistema</span>
+
+      <a class="sidebar-nav-item" style="color:var(--text-muted)">
+        <span class="sidebar-nav-icon">⚙️</span>
+        Configuración
+      </a>
+
+      <a class="sidebar-nav-item" style="color:var(--danger)" onclick="API.AuthService.logout()">
+        <span class="sidebar-nav-icon">🚪</span>
+        Cerrar sesión
+      </a>
+    </aside>
+
+    <!-- ── MAIN CONTENT ───────────────────────────────────────── -->
+    <main class="app-main">
+
+      <!-- ═══ DASHBOARD ═══════════════════════════════════════ -->
+      <section id="page-dashboard" class="page-section">
+
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Dashboard</h1>
+            <p class="page-subtitle">Resumen general del sistema de subastas</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-secondary" onclick="App.Dashboard.init()">↻ Actualizar</button>
+            <button class="btn btn-primary" onclick="App.Subastas.openFormNuevo(); UI.setActivePage('page-subastas')">+
+              Nueva subasta</button>
+          </div>
+        </div>
+
+        <!-- Métricas -->
+        <div class="metrics-grid">
+          <div class="metric-card accent">
+            <div class="metric-icon">🏷️</div>
+            <div class="metric-label">Total subastas</div>
+            <div class="metric-value" id="stat-subastas">—</div>
+          </div>
+          <div class="metric-card success">
+            <div class="metric-icon">⚡</div>
+            <div class="metric-label">Subastas activas</div>
+            <div class="metric-value" id="stat-activas">—</div>
+            <div class="metric-delta up" id="stat-activas-delta">En curso ahora</div>
+          </div>
+          <div class="metric-card warning">
+            <div class="metric-icon">📋</div>
+            <div class="metric-label">Total de pujas</div>
+            <div class="metric-value" id="stat-pujas">—</div>
+          </div>
+          <div class="metric-card purple">
+            <div class="metric-icon">💰</div>
+            <div class="metric-label">Volumen adjudicado</div>
+            <div class="metric-value money" id="stat-monto">—</div>
+          </div>
+          <div class="metric-card accent">
+            <div class="metric-icon">👥</div>
+            <div class="metric-label">Usuarios activos</div>
+            <div class="metric-value" id="stat-usuarios">—</div>
+          </div>
+          <div class="metric-card danger">
+            <div class="metric-icon">⚠️</div>
+            <div class="metric-label">Disputas pendientes</div>
+            <div class="metric-value" id="stat-disputas">—</div>
+          </div>
+        </div>
+
+        <!-- Subastas recientes -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Subastas recientes</span>
+            <button class="btn btn-ghost btn-sm" onclick="UI.setActivePage('page-subastas'); App.Subastas.init()">Ver
+              todas →</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Producto</th>
+                  <th>Estado</th>
+                  <th>Monto actual</th>
+                  <th>Pujas</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="recent-auctions-body">
+                <tr>
+                  <td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Cargando...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ═══ PRODUCTOS ════════════════════════════════════════ -->
+      <section id="page-productos" class="page-section hidden">
+
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Productos</h1>
+            <p class="page-subtitle">Gestioná el catálogo de productos disponibles para subastar</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-primary" id="btn-nuevo-producto" onclick="App.Productos.openFormNuevo()">+ Nuevo
+              producto</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="table-filters">
+            <div class="filter-search">
+              <span class="filter-search-icon">🔍</span>
+              <input type="search" id="productos-search" placeholder="Buscar por título...">
+            </div>
+
+            <select class="filter-select" id="productos-cat-filter">
+              <option value="">Todas las categorías</option>
+              <option value="1">Electrónica</option>
+              <option value="2">Ropa y Moda</option>
+              <option value="3">Hogar</option>
+              <option value="4">Deportes</option>
+              <option value="5">Automotores</option>
+              <option value="6">Arte y Antigüedades</option>
+              <option value="7">Otros</option>
+              <option value="8">Instrumentos Musicales</option>
+            </select>
+
+            <span class="filter-count" id="productos-count"></span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Título</th>
+                  <th>Condición</th>
+                  <th>Categoría</th>
+                  <th>Vendedor</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="productos-body">
+                <tr>
+                  <td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Cargando...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ═══ SUBASTAS ═════════════════════════════════════════ -->
+      <section id="page-subastas" class="page-section hidden">
+
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Subastas</h1>
+            <p class="page-subtitle">Administrá el ciclo completo de cada subasta</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-secondary" onclick="App.Subastas.render()">↻ Actualizar</button>
+            <button class="btn btn-primary" id="btn-nueva-subasta">+ Nueva subasta</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="table-filters">
+            <div class="filter-search">
+              <span class="filter-search-icon">🔍</span>
+              <input type="search" id="subastas-search" placeholder="Buscar por producto...">
+            </div>
+            <select class="filter-select" id="subastas-estado-filter">
+              <option value="">Todos los estados</option>
+              <option value="BORRADOR">Borrador</option>
+              <option value="PUBLICADA">Publicada</option>
+              <option value="ACTIVA">Activa</option>
+              <option value="ADJUDICADA">Adjudicada</option>
+              <option value="FINALIZADA">Finalizada</option>
+              <option value="CANCELADA">Cancelada</option>
+              <option value="EN_DISPUTA">En disputa</option>
+            </select>
+            <span class="filter-count" id="subastas-count"></span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Producto</th>
+                  <th>Estado</th>
+                  <th>Monto actual</th>
+                  <th>Pujas</th>
+                  <th>Cierre</th>
+                  <th>Vendedor</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="subastas-body">
+                <tr>
+                  <td colspan="8" style="text-align:center;padding:2rem;color:var(--text-muted)">Cargando...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ═══ MIS PUJAS ════════════════════════════════════════ -->
+      <section id="page-pujas" class="page-section hidden">
+
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Mis pujas</h1>
+            <p class="page-subtitle">Historial de todas tus ofertas registradas</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Monto</th>
+                  <th>Fecha y hora</th>
+                  <th>Subasta</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody id="mis-pujas-body">
+                <tr>
+                  <td colspan="5" style="text-align:center;padding:2rem;color:var(--text-muted)">Cargando...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ═══ USUARIOS ═════════════════════════════════════════ -->
+      <section id="page-usuarios" class="page-section hidden">
+
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Usuarios</h1>
+            <p class="page-subtitle">Gestioná cuentas, roles y bloqueos (solo ADMIN)</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="table-filters">
+            <div class="filter-search">
+              <span class="filter-search-icon">🔍</span>
+              <input type="search" id="usuarios-search" placeholder="Buscar por username o email...">
+            </div>
+            <select class="filter-select" id="usuarios-estado-filter">
+              <option value="">Todos</option>
+              <option value="activo">Activos</option>
+              <option value="bloqueado">Bloqueados</option>
+            </select>
+            <span class="filter-count" id="usuarios-count"></span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Usuario</th>
+                  <th>Email</th>
+                  <th>Roles</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="usuarios-body">
+                <tr>
+                  <td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Cargando...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+    </main><!-- /app-main -->
+
+  </div><!-- /app-shell -->
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+    DRAWER (panel lateral deslizante para formularios)
+═══════════════════════════════════════════════════════════ -->
+  <div class="drawer-overlay" id="drawer-overlay"></div>
+  <aside class="drawer" id="drawer" aria-label="Panel de formulario">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title" id="drawer-title">Formulario</div>
+        <div class="drawer-subtitle" id="drawer-subtitle"></div>
+      </div>
+      <button class="drawer-close" id="drawer-close-btn" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="drawer-body" id="drawer-body">
+      <!-- Contenido dinámico inyectado por app.js -->
+    </div>
+    <div class="drawer-footer">
+      <button class="btn btn-secondary" id="drawer-cancel-btn">Cancelar</button>
+      <button class="btn btn-primary" id="drawer-save-btn">Guardar</button>
+    </div>
+  </aside>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+     MODAL DE CONFIRMACIÓN
+═══════════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <div class="modal-icon danger" id="modal-icon">⚠️</div>
+        <div>
+          <div class="modal-title" id="modal-title">¿Estás seguro?</div>
+          <div class="modal-desc" id="modal-desc"></div>
+        </div>
+      </div>
+      <!-- Área para inputs extra (motivo de cancelación, etc.) -->
+      <div id="modal-extra"></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="modal-cancel-btn">Cancelar</button>
+        <button class="btn btn-danger" id="modal-confirm-btn">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+     SCRIPTS
+     Orden: api.js → ui.js → app.js
+     Para conectar al backend real: cambiar USE_MOCK = false en api.js
+═══════════════════════════════════════════════════════════ -->
+  <script src="js/api.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const usuarioLogueado = Auth.getUser(); 
+    
+    // Esto nos va a mostrar en la consola del navegador qué hay adentro de la sesión:
+    console.log("Usuario de la sesión actual:", usuarioLogueado);
+
+    const txtUsername = document.querySelector('.header-username');
+    const txtAvatar = document.querySelector('.header-avatar');
+
+    if (usuarioLogueado) {
+        // Probamos con .username o con .email, o lo que venga
+        const nombreAMostrar = usuarioLogueado.username || usuarioLogueado.email || null;
+        
+        console.log("Nombre detectado para mostrar:", nombreAMostrar);
+
+        if (nombreAMostrar && txtUsername) {
+            txtUsername.textContent = nombreAMostrar;
+            if (txtAvatar) {
+                txtAvatar.textContent = nombreAMostrar.charAt(0).toUpperCase();
+            }
+        }
+    } else {
+        console.log("No se encontró ningún usuario logueado en Auth.getUser()");
+    }
+  });
+</script>
+</body>
+
+</html>
