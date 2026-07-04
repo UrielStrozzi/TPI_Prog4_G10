@@ -20,42 +20,36 @@ public class UsuarioController {
     @Autowired
     private UsuarioService usuarioService;
 
-    
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')") // ← CORREGIDO
     public ResponseEntity<List<UsuarioResponse>> obtenerTodos() {
         return ResponseEntity.ok(usuarioService.listarTodos()); 
     }
 
-    
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')") // ← CORREGIDO
     public ResponseEntity<UsuarioResponse> obtenerPorId(@PathVariable Long id) {
         return ResponseEntity.ok(usuarioService.buscarPorId(id));
     }
 
-    
     @PutMapping("/{id}/bloquear")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')") // ← CORREGIDO
     public ResponseEntity<UsuarioResponse> bloquearUsuario(@PathVariable Long id) {
         return ResponseEntity.ok(usuarioService.bloquearUsuario(id));
     }
 
-    
     @PutMapping("/{id}/desbloquear")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')") // ← CORREGIDO
     public ResponseEntity<UsuarioResponse> desbloquearUsuario(@PathVariable Long id) {
         return ResponseEntity.ok(usuarioService.desbloquearUsuario(id));
     }
 
-    
     @PutMapping("/{id}/roles")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')") // ← CORREGIDO
     public ResponseEntity<UsuarioResponse> asignarRoles(@PathVariable Long id, @RequestBody Set<String> nuevosRoles) {
         return ResponseEntity.ok(usuarioService.asignarRoles(id, nuevosRoles));
     }
 
-    
     @GetMapping("/me")
     public ResponseEntity<UsuarioResponse> obtenerPerfilActual(@AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(usuarioService.buscarPorUsername(userDetails.getUsername()));

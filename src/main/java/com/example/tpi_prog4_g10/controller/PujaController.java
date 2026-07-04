@@ -25,37 +25,36 @@ import org.springframework.security.core.Authentication;
 @RequiredArgsConstructor
 public class PujaController {
 
-    private final PujaService pujaService;
-    private final UsuarioRepository usuarioRepository;
-    private final VMisPujasRepository vMisPujasRepository;
+        private final PujaService pujaService;
+        private final UsuarioRepository usuarioRepository;
+        private final VMisPujasRepository vMisPujasRepository;
 
+        @PostMapping("/{subastaId}/pujas")
+        @PreAuthorize("hasRole('USER')")
+        public ResponseEntity<MensajeResponse> ofertar(
+                        @PathVariable Long subastaId,
+                        @AuthenticationPrincipal UserDetails userDetails,
+                        @RequestBody PujaRequest request) {
 
-    @PostMapping("/{subastaId}/pujas")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<MensajeResponse> ofertar(
-            @PathVariable Long subastaId,
-            @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody PujaRequest request) {
+                Usuario usuario = usuarioRepository.findByUsername(userDetails.getUsername())
+                                .orElseThrow(() -> new RuntimeException("Usuario no encontrado."));
 
-        Usuario usuario = usuarioRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado."));
+                pujaService.registrarPuja(subastaId, usuario.getId(), request.getMonto());
 
-        pujaService.registrarPuja(subastaId, usuario.getId(), request.getMonto());
+                return new ResponseEntity<>(
+                                new MensajeResponse("¡Puja registrada con éxito! Sos el máximo postor."),
+                                HttpStatus.CREATED);
+        }
 
-        return new ResponseEntity<>(
-                new MensajeResponse("¡Puja registrada con éxito! Sos el máximo postor."),
-                HttpStatus.CREATED);
-    }
-
-    @GetMapping("/mias")
+        @GetMapping("/mias")
         @PreAuthorize("isAuthenticated()")
         public ResponseEntity<List<VMisPujas>> misPujas(Authentication authentication) {
-                
-        Usuario usuario = usuarioRepository.findByEmail(authentication.getName())
-                .or(() -> usuarioRepository.findByUsername(authentication.getName()))
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        System.out.println("Usuario id: " + usuario.getId());
-        System.out.println("Username: " + authentication.getName());
-        return ResponseEntity.ok(pujaService.obtenerMisPujas(usuario.getId()));
+
+                Usuario usuario = usuarioRepository.findByEmail(authentication.getName())
+                                .or(() -> usuarioRepository.findByUsername(authentication.getName()))
+                                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                System.out.println("Usuario id: " + usuario.getId());
+                System.out.println("Username: " + authentication.getName());
+                return ResponseEntity.ok(pujaService.obtenerMisPujas(usuario.getId()));
         }
 }

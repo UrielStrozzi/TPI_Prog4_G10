@@ -49,7 +49,6 @@ public class SubastaController {
         return new ResponseEntity<>(convertirADto(nuevaSubasta), HttpStatus.CREATED);
     }
 
-    
     @PostMapping("/{id}/publicar")
     public ResponseEntity<SubastaResponse> publicar(@PathVariable Long id) {
         Subasta subastaPublicada = subastaService.publicarSubasta(id);
@@ -57,15 +56,16 @@ public class SubastaController {
     }
 
     @PostMapping("/{id}/cancelar")
-    @PreAuthorize("hasRole('SELLER') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('SELLER') or hasAuthority('ADMIN')") // ← CORREGIDO: de hasRole a hasAuthority
     public ResponseEntity<SubastaResponse> cancelar(
-        
             @PathVariable Long id,
             @RequestParam(required = false) String motivo,
             Authentication authentication) {
 
+        // ← CORREGIDO: Buscamos "ADMIN" sin el prefijo ROLE_
         boolean esAdmin = authentication.getAuthorities().stream()
-            .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+            .anyMatch(a -> a.getAuthority().equals("ADMIN"));
+            
         System.out.println("Roles del usuario: " + authentication.getAuthorities());
         System.out.println("Es admin: " + esAdmin);
         Subasta subastaCancelada = subastaService.cancelarSubasta(id, motivo, authentication.getName(), esAdmin);
@@ -80,7 +80,6 @@ public class SubastaController {
         return ResponseEntity.ok(respuestas);
     }
 
-    
     @GetMapping("/estado/{estado}")
     public ResponseEntity<List<SubastaResponse>> obtenerPorEstado(@PathVariable EstadoSubasta estado) {
         List<SubastaResponse> respuestas = subastaService.obtenerPorEstado(estado).stream()
@@ -89,27 +88,25 @@ public class SubastaController {
         return ResponseEntity.ok(respuestas);
     }
 
-    
     @GetMapping("/{id}")
     public ResponseEntity<SubastaResponse> obtenerPorId(@PathVariable Long id) {
         Subasta subasta = subastaService.obtenerPorId(id);
         return ResponseEntity.ok(convertirADto(subasta));
     }
 
-    
-private SubastaResponse convertirADto(Subasta subasta) {
-    return SubastaResponse.builder()
-            .id(subasta.getId())
-            .productoNombre(subasta.getProducto().getNombre())
-            .precioBase(subasta.getPrecioBase())
-            .montoActual(subasta.getMontoActual())
-            .incrementoMinimo(subasta.getIncrementoMinimo())
-            .fechaInicio(subasta.getFechaInicio())
-            .fechaFin(subasta.getFechaCierre())
-            .estado(subasta.getEstado().name())
-            .nombreGanadorParcial(subasta.getGanador() != null ? subasta.getGanador().getNombre() : null)
-            .totalPujas(pujaRepository.countBySubastaId(subasta.getId()))                       // ← nuevo
-            .vendedorUsername(subasta.getVendedor().getUsername())                 // ← nuevo
-            .build();
-}
+    private SubastaResponse convertirADto(Subasta subasta) {
+        return SubastaResponse.builder()
+                .id(subasta.getId())
+                .productoNombre(subasta.getProducto().getNombre())
+                .precioBase(subasta.getPrecioBase())
+                .montoActual(subasta.getMontoActual())
+                .incrementoMinimo(subasta.getIncrementoMinimo())
+                .fechaInicio(subasta.getFechaInicio())
+                .fechaFin(subasta.getFechaCierre())
+                .estado(subasta.getEstado().name())
+                .nombreGanadorParcial(subasta.getGanador() != null ? subasta.getGanador().getNombre() : null)
+                .totalPujas(pujaRepository.countBySubastaId(subasta.getId()))
+                .vendedorUsername(subasta.getVendedor().getUsername())
+                .build();
+    }
 }
