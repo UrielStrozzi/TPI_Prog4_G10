@@ -29,5 +29,6 @@ public class Categoria {
     
     @OneToMany(mappedBy = "categoria", fetch = FetchType.LAZY)
     @JsonIgnore  // ← corta la recursión
+    @Builder.Default
     private List<Producto> productos = new ArrayList<>();
 }

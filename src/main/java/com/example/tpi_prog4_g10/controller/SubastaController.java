@@ -42,7 +42,7 @@ public class SubastaController {
                 .precioBase(request.getPrecioBase())
                 .incrementoMinimo(request.getIncrementoMinimo())
                 .fechaInicio(request.getFechaInicio())
-                .fechaCierre(request.getFechaCierre())
+                .fechaFin(request.getFechaFin())
                 .build();
 
         Subasta nuevaSubasta = subastaService.crearSubasta(subasta);
@@ -56,19 +56,17 @@ public class SubastaController {
     }
 
     @PostMapping("/{id}/cancelar")
-    @PreAuthorize("hasAuthority('SELLER') or hasAuthority('ADMIN')") // ← CORREGIDO: de hasRole a hasAuthority
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
     public ResponseEntity<SubastaResponse> cancelar(
             @PathVariable Long id,
             @RequestParam(required = false) String motivo,
             Authentication authentication) {
 
-        // ← CORREGIDO: Buscamos "ADMIN" sin el prefijo ROLE_
         boolean esAdmin = authentication.getAuthorities().stream()
-            .anyMatch(a -> a.getAuthority().equals("ADMIN"));
-            
-        System.out.println("Roles del usuario: " + authentication.getAuthorities());
-        System.out.println("Es admin: " + esAdmin);
-        Subasta subastaCancelada = subastaService.cancelarSubasta(id, motivo, authentication.getName(), esAdmin);
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")); // ← con prefijo ROLE_
+
+        Subasta subastaCancelada = subastaService.cancelarSubasta(
+                id, motivo, authentication.getName(), esAdmin);
         return ResponseEntity.ok(convertirADto(subastaCancelada));
     }
 
@@ -102,7 +100,7 @@ public class SubastaController {
                 .montoActual(subasta.getMontoActual())
                 .incrementoMinimo(subasta.getIncrementoMinimo())
                 .fechaInicio(subasta.getFechaInicio())
-                .fechaFin(subasta.getFechaCierre())
+                .fechaFin(subasta.getFechaFin())
                 .estado(subasta.getEstado().name())
                 .nombreGanadorParcial(subasta.getGanador() != null ? subasta.getGanador().getNombre() : null)
                 .totalPujas(pujaRepository.countBySubastaId(subasta.getId()))

@@ -10,5 +10,5 @@ public class SubastaCreateRequest {
     private BigDecimal precioBase;
     private BigDecimal incrementoMinimo;
     private Instant fechaInicio;
-    private Instant fechaCierre;
+    private Instant fechaFin;
 }

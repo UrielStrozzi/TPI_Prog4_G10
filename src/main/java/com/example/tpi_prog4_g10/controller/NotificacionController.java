@@ -1,45 +1,44 @@
 package com.example.tpi_prog4_g10.controller;
 
 import com.example.tpi_prog4_g10.model.Notificacion;
-import com.example.tpi_prog4_g10.repository.NotificacionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import com.example.tpi_prog4_g10.service.*;
+import com.example.tpi_prog4_g10.repository.*;
+import com.example.tpi_prog4_g10.model.*;
+import com.example.tpi_prog4_g10.dto.request.response.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/notificaciones")
-@CrossOrigin(origins = "*")
 public class NotificacionController {
 
     @Autowired
-    private NotificacionRepository notificacionRepository; 
+    private NotificacionService notificacionService;
 
-    
-    @GetMapping("/mis-notificaciones")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public ResponseEntity<List<Notificacion>> obtenerMisNotificaciones(@AuthenticationPrincipal UserDetails userDetails) {
-        
-        List<Notificacion> notificaciones = notificacionRepository.findByUsuarioUsername(userDetails.getUsername());
-        return ResponseEntity.ok(notificaciones);
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    @GetMapping
+    @PreAuthorize("hasAnyRole('USER', 'SELLER', 'ADMIN')")
+    public ResponseEntity<List<Notificacion>> obtenerMisNotificaciones(
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        Usuario usuario = usuarioRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado."));
+
+        return ResponseEntity.ok(notificacionService.obtenerPorUsuario(usuario.getId()));
     }
 
-    
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Notificacion> crearNotificacion(@RequestBody Notificacion notificacion) {
-        return ResponseEntity.ok(notificacionRepository.save(notificacion));
-    }
-
-    
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> eliminarNotificacion(@PathVariable Long id) {
-        notificacionRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
+    @PutMapping("/{id}/leer")
+    @PreAuthorize("hasAnyRole('USER', 'SELLER', 'ADMIN')")
+    public ResponseEntity<?> marcarComoLeida(@PathVariable Long id) {
+        notificacionService.marcarComoLeida(id);
+        return ResponseEntity.ok(new MensajeResponse("Notificación marcada como leída."));
     }
 }

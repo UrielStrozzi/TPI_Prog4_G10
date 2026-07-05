@@ -6,7 +6,6 @@ import com.example.tpi_prog4_g10.dto.request.RegisterRequest;
 import com.example.tpi_prog4_g10.dto.request.response.MensajeResponse;
 import com.example.tpi_prog4_g10.dto.request.response.JwtResponse; 
 import com.example.tpi_prog4_g10.model.Usuario;
-import com.example.tpi_prog4_g10.repository.UsuarioRepository;
 import com.example.tpi_prog4_g10.service.UsuarioService;
 
 import jakarta.validation.Valid;

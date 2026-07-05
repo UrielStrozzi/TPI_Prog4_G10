@@ -51,7 +51,7 @@ public class PujaService {
             throw new RuntimeException("Error: Solo se puede pujar en subastas ACTIVAS.");
         }
 
-        if (Instant.now().isAfter(subasta.getFechaCierre())) {
+        if (Instant.now().isAfter(subasta.getFechaFin())) {
             throw new RuntimeException("Error: La subasta ya ha cerrado.");
         }
 

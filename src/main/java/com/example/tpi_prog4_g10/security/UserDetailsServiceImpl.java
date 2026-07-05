@@ -40,7 +40,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                                 .collect(Collectors.toList());
 
                 return new org.springframework.security.core.userdetails.User(
-                                usuario.getEmail(),
+                                usuario.getUsername(),
                                 usuario.getPasswordHash(),
                                 !usuario.estaEliminado(),
                                 true,

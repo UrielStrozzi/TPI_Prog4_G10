@@ -15,7 +15,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import com.example.tpi_prog4_g10.repository.UsuarioRepository;
-import com.example.tpi_prog4_g10.repository.VMisPujasRepository;
 import com.example.tpi_prog4_g10.model.Usuario;
 import com.example.tpi_prog4_g10.model.VMisPujas;
 import org.springframework.security.core.Authentication;
@@ -27,7 +26,6 @@ public class PujaController {
 
         private final PujaService pujaService;
         private final UsuarioRepository usuarioRepository;
-        private final VMisPujasRepository vMisPujasRepository;
 
         @PostMapping("/{subastaId}/pujas")
         @PreAuthorize("hasRole('USER')")

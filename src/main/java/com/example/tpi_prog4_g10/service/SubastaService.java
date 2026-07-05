@@ -35,13 +35,13 @@ public class SubastaService {
             subasta.setVendedor(subasta.getProducto().getVendedor());
         }
 
-        if (subasta.getFechaCierre() == null
+        if (subasta.getFechaFin() == null
                 || subasta.getFechaInicio() == null) {
             throw new RuntimeException(
                     "Las fechas de inicio y fin son obligatorias.");
         }
 
-        if (!subasta.getFechaCierre()
+        if (!subasta.getFechaFin()
                 .isAfter(subasta.getFechaInicio())) {
             throw new RuntimeException(
                     "La fecha de cierre debe ser posterior a la fecha de inicio.");

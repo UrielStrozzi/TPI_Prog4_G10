@@ -24,7 +24,7 @@ public interface SubastaRepository extends JpaRepository<Subasta, Long> {
             EstadoSubasta estado,
             Instant fecha);
 
-    List<Subasta> findByEstadoAndFechaCierreLessThanEqual(
+    List<Subasta> findByEstadoAndFechaFinLessThanEqual(
             EstadoSubasta estado,
             Instant fecha);
 

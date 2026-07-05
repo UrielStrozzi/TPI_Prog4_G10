@@ -67,7 +67,7 @@ public class Subasta {
     private Instant fechaInicio;
 
     @Column(name = "fecha_cierre", nullable = false)
-    private Instant fechaCierre;
+    private Instant fechaFin;
 
     // ── Estado ────────────────────────────────────────────────
     @Enumerated(EnumType.STRING)
@@ -102,13 +102,14 @@ public class Subasta {
     private Instant updatedAt;
 
     @Version
+    @Builder.Default
     @Column(nullable = false)
     private Long version = 0L;
 
     // ── Métodos de dominio ────────────────────────────────────
     public boolean estaActiva() {
         return this.estado == EstadoSubasta.ACTIVA
-                && Instant.now().isBefore(this.fechaCierre);
+                && Instant.now().isBefore(this.fechaFin);
     }
 
     public boolean tienePujasMonto() {

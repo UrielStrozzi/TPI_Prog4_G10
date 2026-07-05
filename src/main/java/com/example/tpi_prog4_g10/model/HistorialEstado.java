@@ -5,6 +5,7 @@ import lombok.*;
 import java.time.Instant;
 
 import com.example.tpi_prog4_g10.enums.EstadoSubasta;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "historial_estados_subasta")
@@ -21,6 +22,7 @@ public class HistorialEstado {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subasta_id", nullable = false)
+    @JsonIgnore // ← corta recursión subasta → historial → subasta
     private Subasta subasta;
 
     @Enumerated(EnumType.STRING)
@@ -34,7 +36,18 @@ public class HistorialEstado {
     @Column(nullable = false)
     private Instant fecha;
 
+    @Column(columnDefinition = "TEXT") // ← nullable, sin nullable = false
+    private String motivo;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id")
+    @JsonIgnore // ← corta recursión usuario → historial → usuario
     private Usuario usuarioResponsable;
+
+    // Campo extra para el frontend — username sin exponer el objeto Usuario
+    // completo
+    @Transient // no se persiste en BD
+    public String getUsuarioUsername() {
+        return usuarioResponsable != null ? usuarioResponsable.getUsername() : null;
+    }
 }
