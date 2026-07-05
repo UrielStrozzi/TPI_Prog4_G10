@@ -94,19 +94,19 @@ const MOCK = {
   ],
 
   productos: [
-    { id: 1, titulo: 'MacBook Pro 14" M3', descripcion: 'Excelente estado, 16GB RAM.', condicion: 'USADO', categoriaId: 1, categoriaNombre: 'Electrónica', vendedorUsername: 'carlos_seller', createdAt: '2025-06-10T14:22:00Z' },
-    { id: 2, titulo: 'Silla Gamer ErgoMax Pro', descripcion: 'Nunca usada, caja original.', condicion: 'NUEVO', categoriaId: 3, categoriaNombre: 'Hogar', vendedorUsername: 'maria_s', createdAt: '2025-06-12T09:00:00Z' },
-    { id: 3, titulo: 'Guitarra Fender Stratocaster 1978', descripcion: 'Coleccionable original USA.', condicion: 'USADO', categoriaId: 5, categoriaNombre: 'Arte y Antigüedades', vendedorUsername: 'carlos_seller', createdAt: '2025-06-08T18:45:00Z' },
-    { id: 4, titulo: 'iPhone 15 Pro Max 256GB', descripcion: 'Titanio negro, batería 98%.', condicion: 'REACONDICIONADO', categoriaId: 1, categoriaNombre: 'Electrónica', vendedorUsername: 'techseller01', createdAt: '2025-06-14T11:30:00Z' },
-    { id: 5, titulo: 'Monitor LG UltraWide 34"', descripcion: 'QHD 144Hz. Panel IPS.', condicion: 'NUEVO', categoriaId: 1, categoriaNombre: 'Electrónica', vendedorUsername: 'maria_s', createdAt: '2025-06-15T08:00:00Z' },
+    { id: 1, nombre: 'MacBook Pro 14" M3', descripcion: 'Excelente estado, 16GB RAM.', condicion: 'USADO', categoriaId: 1, categoriaNombre: 'Electrónica', vendedorUsername: 'carlos_seller', createdAt: '2025-06-10T14:22:00Z' },
+    { id: 2, nombre: 'Silla Gamer ErgoMax Pro', descripcion: 'Nunca usada, caja original.', condicion: 'NUEVO', categoriaId: 3, categoriaNombre: 'Hogar', vendedorUsername: 'maria_s', createdAt: '2025-06-12T09:00:00Z' },
+    { id: 3, nombre: 'Guitarra Fender Stratocaster 1978', descripcion: 'Coleccionable original USA.', condicion: 'USADO', categoriaId: 5, categoriaNombre: 'Arte y Antigüedades', vendedorUsername: 'carlos_seller', createdAt: '2025-06-08T18:45:00Z' },
+    { id: 4, nombre: 'iPhone 15 Pro Max 256GB', descripcion: 'Titanio negro, batería 98%.', condicion: 'REACONDICIONADO', categoriaId: 1, categoriaNombre: 'Electrónica', vendedorUsername: 'techseller01', createdAt: '2025-06-14T11:30:00Z' },
+    { id: 5, nombre: 'Monitor LG UltraWide 34"', descripcion: 'QHD 144Hz. Panel IPS.', condicion: 'NUEVO', categoriaId: 1, categoriaNombre: 'Electrónica', vendedorUsername: 'maria_s', createdAt: '2025-06-15T08:00:00Z' },
   ],
 
   subastas: [
-    { id: 1, productoNombre: 'MacBook Pro 14" M3', productoId: 1, vendedorUsername: 'carlos_seller', categoriaId: 1, categoriaNombre: 'Electrónica', precioBase: 150000, incrementoMinimo: 5000, montoActual: 178000, estado: 'ACTIVA', fechaInicio: new Date(Date.now() - 3600000*2).toISOString(), fechaFin: new Date(Date.now() + 3600000*22).toISOString(), totalPujas: 7, ganadorUsername: 'jperez' },
-    { id: 2, productoNombre: 'Silla Gamer ErgoMax Pro', productoId: 2, vendedorUsername: 'maria_s', categoriaId: 3, categoriaNombre: 'Hogar', precioBase: 45000, incrementoMinimo: 2000, montoActual: null, estado: 'PUBLICADA', fechaInicio: new Date(Date.now() + 3600000*3).toISOString(), fechaFin: new Date(Date.now() + 3600000*75).toISOString(), totalPujas: 0, ganadorUsername: null },
-    { id: 3, productoNombre: 'Guitarra Fender Stratocaster 1978', productoId: 3, vendedorUsername: 'carlos_seller', categoriaId: 5, categoriaNombre: 'Arte', precioBase: 320000, incrementoMinimo: 10000, montoActual: 385000, estado: 'ADJUDICADA', fechaInicio: new Date(Date.now() - 3600000*50).toISOString(), fechaFin: new Date(Date.now() - 3600000*2).toISOString(), totalPujas: 12, ganadorUsername: 'collector99', fechaAdjudicacion: new Date(Date.now() - 3600000*2).toISOString() },
-    { id: 4, productoNombre: 'iPhone 15 Pro Max 256GB', productoId: 4, vendedorUsername: 'techseller01', categoriaId: 1, categoriaNombre: 'Electrónica', precioBase: 200000, incrementoMinimo: 8000, montoActual: null, estado: 'BORRADOR', fechaInicio: new Date(Date.now() + 3600000*48).toISOString(), fechaFin: new Date(Date.now() + 3600000*120).toISOString(), totalPujas: 0, ganadorUsername: null },
-    { id: 5, productoNombre: 'Monitor LG UltraWide 34"', productoId: 5, vendedorUsername: 'maria_s', categoriaId: 1, categoriaNombre: 'Electrónica', precioBase: 80000, incrementoMinimo: 3000, montoActual: null, estado: 'CANCELADA', fechaInicio: new Date(Date.now() - 3600000*10).toISOString(), fechaFin: new Date(Date.now() + 3600000*38).toISOString(), totalPujas: 0, ganadorUsername: null },
+    { id: 1, productoNombre: 'MacBook Pro 14" M3', productoId: 1, vendedorUsername: 'carlos_seller', categoriaId: 1, categoriaNombre: 'Electrónica', precioBase: 150000, incrementoMinimo: 5000, montoActual: 178000, estado: 'ACTIVA', fechaInicio: new Date(Date.now() - 3600000*2).toISOString(), fechaCierre: new Date(Date.now() + 3600000*22).toISOString(), totalPujas: 7, ganadorUsername: 'jperez' },
+    { id: 2, productoNombre: 'Silla Gamer ErgoMax Pro', productoId: 2, vendedorUsername: 'maria_s', categoriaId: 3, categoriaNombre: 'Hogar', precioBase: 45000, incrementoMinimo: 2000, montoActual: null, estado: 'PUBLICADA', fechaInicio: new Date(Date.now() + 3600000*3).toISOString(), fechaCierre: new Date(Date.now() + 3600000*75).toISOString(), totalPujas: 0, ganadorUsername: null },
+    { id: 3, productoNombre: 'Guitarra Fender Stratocaster 1978', productoId: 3, vendedorUsername: 'carlos_seller', categoriaId: 5, categoriaNombre: 'Arte', precioBase: 320000, incrementoMinimo: 10000, montoActual: 385000, estado: 'ADJUDICADA', fechaInicio: new Date(Date.now() - 3600000*50).toISOString(), fechaCierre: new Date(Date.now() - 3600000*2).toISOString(), totalPujas: 12, ganadorUsername: 'collector99', fechaAdjudicacion: new Date(Date.now() - 3600000*2).toISOString() },
+    { id: 4, productoNombre: 'iPhone 15 Pro Max 256GB', productoId: 4, vendedorUsername: 'techseller01', categoriaId: 1, categoriaNombre: 'Electrónica', precioBase: 200000, incrementoMinimo: 8000, montoActual: null, estado: 'BORRADOR', fechaInicio: new Date(Date.now() + 3600000*48).toISOString(), fechaCierre: new Date(Date.now() + 3600000*120).toISOString(), totalPujas: 0, ganadorUsername: null },
+    { id: 5, productoNombre: 'Monitor LG UltraWide 34"', productoId: 5, vendedorUsername: 'maria_s', categoriaId: 1, categoriaNombre: 'Electrónica', precioBase: 80000, incrementoMinimo: 3000, montoActual: null, estado: 'CANCELADA', fechaInicio: new Date(Date.now() - 3600000*10).toISOString(), fechaCierre: new Date(Date.now() + 3600000*38).toISOString(), totalPujas: 0, ganadorUsername: null },
   ],
 
   usuarios: [
@@ -144,6 +144,7 @@ const delay = (ms = 300) => new Promise(r => setTimeout(r, ms));
  * POST /api/auth/register
  * POST /api/auth/login
  */
+
 const AuthService = {
   async login(credentials) {
     if (API_CONFIG.USE_MOCK) {
@@ -205,11 +206,38 @@ const ProductoService = {
       await delay(280);
       let list = [...MOCK.productos];
       if (params.categoriaId) list = list.filter(p => p.categoriaId === +params.categoriaId);
-      if (params.q) list = list.filter(p => p.titulo.toLowerCase().includes(params.q.toLowerCase()));
+      if (params.q) list = list.filter(p => p.nombre.toLowerCase().includes(params.q.toLowerCase()));
       return { content: list, totalElements: list.length, totalPages: 1 };
     }
+    
     const qs = new URLSearchParams(params).toString();
-    return http.get(`/productos${qs ? '?' + qs : ''}`);
+    const response = await http.get(`/productos${qs ? '?' + qs : ''}`);
+    
+    // TRADUCCIÓN REVERSA BLINDADA
+    if (response && response.content) {
+      // Si el backend ya responde con paginación (.content)
+      response.content = response.content.map(p => ({
+        ...p,
+        nombre: p.nombre || p.nombre,
+        vendedorUsername: p.vendedor?.username || p.vendedorUsername || 'Desconocido'
+      }));
+      return response;
+    } else if (Array.isArray(response)) {
+      // ¡EL PARCHE ACÁ! Envolvemos la lista en la estructura { content: [...] } que el front necesita
+      const mappedList = response.map(p => ({
+        ...p,
+        nombre: p.nombre || p.nombre,
+        vendedorUsername: p.vendedor?.username || p.vendedorUsername || 'Desconocido'
+      }));
+      
+      return {
+        content: mappedList,
+        totalElements: mappedList.length,
+        totalPages: 1
+      };
+    }
+    
+    return response;
   },
 
   async crear(data) {
@@ -217,10 +245,18 @@ const ProductoService = {
       await delay(400);
       const nuevo = { id: Date.now(), ...data, createdAt: new Date().toISOString(), vendedorUsername: Auth.getUser()?.username };
       MOCK.productos.push(nuevo);
-      MOCK.stats.totalSubastas; // no incrementar aquí
       return nuevo;
     }
-    return http.post('/productos', data);
+    
+    // TRADUCCIÓN PARA EL BACKEND: pasamos 'nombre' a 'nombre'
+    const dataParaBackend = {
+      nombre: data.nombre,
+      descripcion: data.descripcion,
+      categoriaId: parseInt(data.categoriaId),
+      condicion: data.condicion
+    };
+
+    return http.post('/productos', dataParaBackend);
   },
 
   async editar(id, data) {
@@ -231,7 +267,16 @@ const ProductoService = {
       MOCK.productos[idx] = { ...MOCK.productos[idx], ...data };
       return MOCK.productos[idx];
     }
-    return http.put(`/productos/${id}`, data);
+
+    // TRADUCCIÓN PARA EL BACKEND: pasamos 'nombre' a 'nombre'
+    const dataParaBackend = {
+      nombre: data.nombre,
+      descripcion: data.descripcion,
+      categoriaId: parseInt(data.categoriaId),
+      condicion: data.condicion
+    };
+
+    return http.put(`/productos/${id}`, dataParaBackend);
   },
 
   async eliminar(id) {
@@ -276,7 +321,7 @@ const SubastaService = {
       const cat  = MOCK.categorias.find(c => c.id === +data.categoriaId);
       const nueva = {
         id: Date.now(),
-        productoNombre: prod?.titulo || 'Producto',
+        productoNombre: prod?.nombre || 'Producto',
         productoId: +data.productoId,
         vendedorUsername: Auth.getUser()?.username,
         categoriaId: +data.categoriaId,
@@ -287,7 +332,7 @@ const SubastaService = {
         montoActual: null,
         estado: 'BORRADOR',
         fechaInicio: data.fechaInicio,
-        fechaFin: data.fechaFin,
+        fechaCierre: data.fechaCierre,
         totalPujas: 0,
         ganadorUsername: null,
       };

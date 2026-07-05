@@ -44,21 +44,21 @@ const App = (() => {
           return;
         }
 
-        tbody.innerHTML = this.list.map(p => `
-        <tr>
-          <td class="td-mono">#${p.id}</td>
-          <td class="td-title" title="${p.titulo ?? ''}">${p.titulo ?? '—'}</td>
-          <td>${UI.condicionBadge(p.condicion ?? 'USADO')}</td>
-          <td class="text-secondary text-sm">${p.categoria?.nombre ?? '—'}</td>
-          <td class="text-muted text-sm">${p.vendedor?.username ?? '—'}</td>
-          <td>
-            <div class="td-actions">
-              <button class="btn btn-secondary btn-sm" onclick="App.Productos.openFormEditar(${p.id})">✏️ Editar</button>
-              <button class="btn btn-ghost btn-sm btn-icon" title="Crear subasta" onclick="App.Subastas.openFormNuevo(${p.id})">🏷️</button>
-              <button class="btn btn-danger btn-sm btn-icon" title="Eliminar" onclick="App.Productos.confirmarEliminar(${p.id}, '${(p.titulo ?? '').replace(/'/g, "\\'")}')">🗑️</button>
-            </div>
-          </td>
-        </tr>`).join('');
+        tbody.innerHTML = list.map(s => `
+          <tr>
+            <td class="td-mono">#${s.id}</td>
+            <td class="td-title" title="${s.productoNombre}">${s.productoNombre}</td>
+            <td>${UI.estadoBadge(s.estado)}</td>
+            <td class="td-money">${UI.fmt.money(s.montoActual ?? s.precioBase)}</td>
+            <td class="text-mono text-secondary">${s.totalPujas ?? 0}</td>
+            <td>
+              <div class="td-actions">
+                <button class="btn btn-ghost btn-sm btn-icon" title="Ver pujas" onclick="App.Pujas.showForSubasta(${s.id}, '${s.productoNombre}')">📋</button>
+                ${s.estado === 'BORRADOR' ? `<button class="btn btn-success btn-sm" onclick="App.Subastas.publicar(${s.id})">Publicar</button>` : ''}
+                ${(s.estado === 'PUBLICADA' || s.estado === 'ACTIVA') ? `<button class="btn btn-danger btn-sm btn-icon" title="Cancelar" onclick="App.Subastas.confirmarCancelar(${s.id}, '${s.productoNombre}')">✕</button>` : ''}
+              </div>
+            </td>
+          </tr>`).join('');
 
       } catch(e) {
         tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Error al cargar datos</td></tr>`;
@@ -79,8 +79,31 @@ const App = (() => {
 
     async loadCategorias() {
       try {
-        this.categorias = await API.CategoriaService.listar();
-      } catch (e) { this.categorias = []; }
+        const data = await API.CategoriaService.listar();
+        console.log("DEBUG: Datos recibidos de Categorias:", data); // Esto nos dirá si llegan los datos
+        
+        // Si data es el array directo, perfecto. Si es un objeto, quizás debas usar data.content
+        this.categorias = Array.isArray(data) ? data : (data.content || []); 
+      } catch(e) { 
+        console.error("Error al cargar categorías:", e);
+        this.categorias = []; 
+      }
+    },
+
+    async openFormNuevo() {
+      // 1. Cargamos las categorías forzosamente al abrir
+      await this.loadCategorias();
+      
+      // 2. Verificamos si tenemos datos
+      console.log("Categorías disponibles antes de abrir:", this.categorias);
+
+      UI.Drawer.open({
+        title: 'Nuevo producto',
+        subtitle: 'Completá los datos del producto a subastar',
+        saveLabel: 'Crear producto',
+        bodyHtml: this.formHtml(),
+        onSubmit: () => this.submitNuevo(),
+      });
     },
 
     async render(params = {}) {
@@ -97,43 +120,43 @@ const App = (() => {
 
         if (!this.list.length) {
           tbody.innerHTML = `<tr><td colspan="6">
-          <div class="empty-state">
-            <div class="empty-state-icon">📦</div>
-            <div class="empty-state-title">Sin productos</div>
-            <div class="empty-state-desc">Agregá el primero para poder crear subastas.</div>
-            <button class="btn btn-primary" onclick="App.Productos.openFormNuevo()">+ Nuevo producto</button>
-          </div></td></tr>`;
+            <div class="empty-state">
+              <div class="empty-state-icon">📦</div>
+              <div class="empty-state-title">Sin productos</div>
+              <div class="empty-state-desc">Agregá el primero para poder crear subastas.</div>
+              <button class="btn btn-primary" onclick="App.Productos.openFormNuevo()">+ Nuevo producto</button>
+            </div></td></tr>`;
           return;
         }
 
         tbody.innerHTML = this.list.map(p => `
-        <tr>
-          <td class="td-mono">#${p.id}</td>
-          <td class="td-title" title="${p.nombre ?? ''}">${p.nombre ?? '—'}</td>
-          <td>${p.estado ? UI.condicionBadge(p.estado) : '—'}</td>
-          <td class="text-secondary text-sm">${p.categoriaNombre ?? '—'}</td>
-          <td class="text-muted text-sm">${p.vendedorNombre ?? p.vendedorEmail ?? '—'}</td>
-          <td>
-            <div class="td-actions">
-              <button class="btn btn-secondary btn-sm" onclick="App.Productos.openFormEditar(${p.id})">✏️ Editar</button>
-              <button class="btn btn-ghost btn-sm btn-icon" title="Crear subasta desde este producto" onclick="App.Subastas.openFormNuevo(${p.id})">🏷️</button>
-              <button class="btn btn-danger btn-sm btn-icon" title="Eliminar" onclick="App.Productos.confirmarEliminar(${p.id}, '${(p.nombre ?? '').replace(/'/g, "\\'")}')">🗑️</button>
-            </div>
-          </td>
-        </tr>`).join('');
+          <tr>
+            <td class="td-mono">#${p.id}</td>
+            <td class="td-title" title="${p.nombre}">${p.nombre}</td>
+            <td>${UI.condicionBadge(p.condicion)}</td>
+            <td class="text-secondary text-sm">${p.categoriaNombre ?? '—'}</td>
+            <td class="text-muted text-sm">${p.vendedorUsername}</td>
+            <td>
+              <div class="td-actions">
+                <button class="btn btn-secondary btn-sm" onclick="App.Productos.openFormEditar(${p.id})">✏️ Editar</button>
+                <button class="btn btn-ghost btn-sm btn-icon" title="Crear subasta desde este producto" onclick="App.Subastas.openFormNuevo(${p.id})">🏷️</button>
+                <button class="btn btn-danger btn-sm btn-icon" title="Eliminar" onclick="App.Productos.confirmarEliminar(${p.id}, '${p.nombre.replace(/'/g, "\\'")}')">🗑️</button>
+              </div>
+            </td>
+          </tr>`).join('');
 
-      } catch (e) {
+      } catch(e) {
         tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Error al cargar productos</td></tr>`;
       }
     },
 
     bindFilters() {
       const searchInput = document.getElementById('productos-search');
-      const catFilter = document.getElementById('productos-cat-filter');
+      const catFilter   = document.getElementById('productos-cat-filter');
 
       let debounceTimer;
       const doFilter = () => {
-        const q = searchInput?.value?.trim();
+        const q   = searchInput?.value?.trim();
         const cat = catFilter?.value;
         this.render({ q: q || undefined, categoriaId: cat || undefined });
       };
@@ -145,6 +168,7 @@ const App = (() => {
 
       catFilter?.addEventListener('change', doFilter);
 
+      // Poblar select de categorias en filtro
       if (catFilter) {
         catFilter.innerHTML = `<option value="">Todas las categorías</option>` +
           this.categorias.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
@@ -153,9 +177,7 @@ const App = (() => {
 
     catOptions(selected = '') {
       return `<option value="">Seleccioná una categoría</option>` +
-        this.categorias.map(c =>
-          `<option value="${c.id}" ${c.id == selected ? 'selected' : ''}>${c.nombre}</option>`
-        ).join('');
+        this.categorias.map(c => `<option value="${c.id}" ${c.id == selected ? 'selected' : ''}>${c.nombre}</option>`).join('');
     },
 
     openFormNuevo() {
@@ -173,99 +195,90 @@ const App = (() => {
       if (!p) return;
       UI.Drawer.open({
         title: 'Editar producto',
-        subtitle: `#${p.id} · ${p.titulo ?? ''}`,
+        subtitle: `#${p.id} · ${p.nombre}`,
         saveLabel: 'Guardar cambios',
-        bodyHtml: this.formHtml({
-          ...p,
-          nombre: p.titulo,              // el form usa "nombre" internamente
-          categoriaId: p.categoria?.id,  // extraer el id del objeto anidado
-          estado: p.condicion,           // mapear condicion → estado para el select
-        }),
+        bodyHtml: this.formHtml(p),
         onSubmit: () => this.submitEditar(id),
       });
     },
 
     formHtml(p = {}) {
       return `
-      <div class="form-section-title">Información básica</div>
+        <div class="form-section-title">Información básica</div>
 
-      <div class="form-group">
-        <label class="form-label">Título del producto <span class="required">*</span></label>
-        <input name="titulo" class="form-control" type="text"
-          value="${p.nombre ?? ''}"
-          placeholder="Ej: MacBook Pro 14 pulgadas M3 2023" maxlength="200">
-        <div class="form-error">El título es requerido.</div>
-      </div>
-
-      <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Categoría <span class="required">*</span></label>
-          <select name="categoriaId" class="form-control">
-            ${this.catOptions(p.categoriaId)}
-          </select>
-          <div class="form-error">Seleccioná una categoría.</div>
+          <label class="form-label">Título del producto <span class="required">*</span></label>
+          <input name="nombre" class="form-control" type="text" value="${p.nombre ?? ''}" placeholder="Ej: MacBook Pro 14 pulgadas M3 2023" maxlength="200">
+          <div class="form-error">El título es requerido.</div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Condición <span class="required">*</span></label>
-          <select name="condicion" class="form-control">
-            <option value="NUEVO"           ${p.estado === 'NUEVO' ? 'selected' : ''}>Nuevo</option>
-            <option value="USADO"           ${p.estado === 'USADO' ? 'selected' : ''}>Usado</option>
-            <option value="REACONDICIONADO" ${p.estado === 'REACONDICIONADO' ? 'selected' : ''}>Reacondicionado</option>
-          </select>
-        </div>
-      </div>
 
-      <div class="form-group">
-        <label class="form-label">Descripción</label>
-        <textarea name="descripcion" class="form-control" rows="4"
-          placeholder="Describí el estado, características destacadas, accesorios incluidos...">${p.descripcion ?? ''}</textarea>
-        <div class="form-hint">Cuanto más detallada, más confianza generás en los compradores.</div>
-      </div>`;
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Categoría <span class="required">*</span></label>
+            <select name="categoriaId" class="form-control">
+              ${this.catOptions(p.categoriaId)}
+            </select>
+            <div class="form-error">Seleccioná una categoría.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Condición <span class="required">*</span></label>
+            <select name="condicion" class="form-control">
+              <option value="NUEVO"           ${p.condicion === 'NUEVO'           ? 'selected' : ''}>Nuevo</option>
+              <option value="USADO"           ${p.condicion === 'USADO'           ? 'selected' : ''}>Usado</option>
+              <option value="REACONDICIONADO" ${p.condicion === 'REACONDICIONADO' ? 'selected' : ''}>Reacondicionado</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Descripción</label>
+          <textarea name="descripcion" class="form-control" rows="4" placeholder="Describí el estado, características destacadas, accesorios incluidos...">${p.descripcion ?? ''}</textarea>
+          <div class="form-hint">Cuanto más detallada, más confianza generás en los compradores.</div>
+        </div>`;
     },
 
     async submitNuevo() {
       UI.Drawer.clearErrors();
-      const titulo = UI.Drawer.getField('titulo');
+      const nombre      = UI.Drawer.getField('nombre');
       const categoriaId = UI.Drawer.getField('categoriaId');
-      const condicion = UI.Drawer.getField('condicion');
+      const condicion   = UI.Drawer.getField('condicion');
       const descripcion = UI.Drawer.getField('descripcion');
 
       let valid = true;
-      if (!titulo) { UI.Drawer.setFieldError('titulo', 'El título es requerido.'); valid = false; }
+      if (!nombre) { UI.Drawer.setFieldError('nombre', 'El título es requerido.'); valid = false; }
       if (!categoriaId) { UI.Drawer.setFieldError('categoriaId', 'Seleccioná una categoría.'); valid = false; }
       if (!valid) throw { data: 'Corregí los campos marcados.' };
 
-      // El backend espera "titulo" en el body del POST
-      await API.ProductoService.crear({ titulo, categoriaId, condicion, descripcion });
+      await API.ProductoService.crear({ nombre, categoriaId, condicion, descripcion });
       UI.Drawer.close();
-      UI.Toast.success('Producto creado', `"${titulo}" fue agregado correctamente.`);
+      UI.Toast.success('Producto creado', `"${nombre}" fue agregado correctamente.`);
       await this.render();
     },
 
     async submitEditar(id) {
       UI.Drawer.clearErrors();
-      const titulo = UI.Drawer.getField('titulo');
+      const nombre      = UI.Drawer.getField('nombre');
       const categoriaId = UI.Drawer.getField('categoriaId');
-      const condicion = UI.Drawer.getField('condicion');
+      const condicion   = UI.Drawer.getField('condicion');
       const descripcion = UI.Drawer.getField('descripcion');
 
-      if (!titulo) { UI.Drawer.setFieldError('titulo', 'El título es requerido.'); throw { data: '' }; }
+      if (!nombre) { UI.Drawer.setFieldError('nombre', 'El título es requerido.'); throw { data: '' }; }
 
-      await API.ProductoService.editar(id, { titulo, categoriaId, condicion, descripcion });
+      await API.ProductoService.editar(id, { nombre, categoriaId, condicion, descripcion });
       UI.Drawer.close();
       UI.Toast.success('Producto actualizado', 'Los cambios fueron guardados.');
       await this.render();
     },
 
-    confirmarEliminar(id, titulo) {
+    confirmarEliminar(id, nombre) {
       UI.Modal.open({
         iconType: 'danger', iconEmoji: '🗑️',
         title: 'Eliminar producto',
-        desc: `¿Estás seguro de eliminar <strong>"${titulo}"</strong>? Esta acción no se puede deshacer.`,
+        desc: `¿Estás seguro de eliminar <strong>"${nombre}"</strong>? Esta acción no se puede deshacer.`,
         confirmLabel: 'Sí, eliminar', confirmClass: 'btn-danger',
         onConfirm: async () => {
           await API.ProductoService.eliminar(id);
-          UI.Toast.success('Eliminado', `"${titulo}" fue eliminado.`);
+          UI.Toast.success('Eliminado', `"${nombre}" fue eliminado.`);
           await this.render();
         }
       });
@@ -304,38 +317,41 @@ const App = (() => {
           return;
         }
 
-    tbody.innerHTML = this.list.map((s, i) => `
-      <tr>
-        <td class="td-mono">#${s.id}</td>
-        <td class="td-title" title="${s.productoNombre}">${s.productoNombre}</td>
-        <td>${UI.estadoBadge(s.estado)}</td>
-        <td class="td-money">${UI.fmt.money(s.montoActual ?? s.precioBase)}</td>
-        <td class="text-mono text-secondary text-sm">—</td>
-        <td>${s.estado === 'ACTIVA'
-          ? `<span id="timer-${s.id}" class="live-timer">...</span>`
-          : `<span class="text-muted text-sm">${UI.fmt.date(s.fechaFin)}</span>`}
-        </td>
-        <td class="text-muted text-sm">${s.nombreGanadorParcial ?? '—'}</td>
-        <td>
-          <div class="td-actions">
-            ${s.estado === 'BORRADOR'
-              ? `<button class="btn btn-success btn-sm" onclick="App.Subastas.publicar(${s.id})">Publicar</button>`
-              : ''}
-            <button class="btn btn-ghost btn-sm btn-icon" title="Ver pujas" onclick="App.Pujas.showForSubasta(${s.id}, '${s.productoNombre.replace(/'/g,"\\'")}')">📋</button>
-            <button class="btn btn-ghost btn-sm btn-icon" title="Historial" onclick="App.Subastas.showHistorial(${s.id}, '${s.productoNombre.replace(/'/g,"\\'")}')">🕐</button>
-            ${(s.estado === 'PUBLICADA' || s.estado === 'ACTIVA' || s.estado === 'BORRADOR')
-              ? `<button class="btn btn-danger btn-sm btn-icon" title="Cancelar" onclick="App.Subastas.confirmarCancelar(${s.id}, '${s.productoNombre.replace(/'/g,"\\'")}')">✕</button>`
-              : ''}
-          </div>
-        </td>
-      </tr>`).join('');
+        tbody.innerHTML = this.list.map((s, i) => `
+        <tr>
+          <td class="td-mono">#${s.id}</td>
+          <td class="td-title" title="${s.productoNombre ?? ''}">${s.productoNombre ?? '—'}</td>
+          <td>${UI.estadoBadge(s.estado)}</td>
+          <td class="td-money">${UI.fmt.money(s.montoActual ?? s.precioBase)}</td>
+          <td class="text-mono text-secondary text-sm">${s.totalPujas ?? 0}</td>
+          <td>${s.estado === 'ACTIVA'
+                  ? `<span id="timer-${s.id}" class="live-timer">...</span>`
+                  : `<span class="text-muted text-sm">${UI.fmt.date(s.fechaFin)}</span>`}
+          </td>
+          <td class="text-muted text-sm">${s.vendedorUsername ?? '—'}</td>
+          <td>
+            <div class="td-actions">
+              ${s.estado === 'BORRADOR'
+                  ? `<button class="btn btn-success btn-sm" onclick="App.Subastas.publicar(${s.id})">Publicar</button>`
+                  : ''}
+              <button class="btn btn-ghost btn-sm btn-icon" title="Ver pujas"
+                onclick="App.Pujas.showForSubasta(${s.id}, '${(s.productoNombre ?? '').replace(/'/g, "\\'")}')">📋</button>
+              <button class="btn btn-ghost btn-sm btn-icon" title="Historial de estados"
+                onclick="App.Subastas.showHistorial(${s.id}, '${(s.productoNombre ?? '').replace(/'/g, "\\'")}')">🕐</button>
+              ${(s.estado === 'PUBLICADA' || s.estado === 'ACTIVA' || s.estado === 'BORRADOR')
+                  ? `<button class="btn btn-danger btn-sm btn-icon" title="Cancelar"
+                    onclick="App.Subastas.confirmarCancelar(${s.id}, '${(s.productoNombre ?? '').replace(/'/g, "\\'")}')">✕</button>`
+                  : ''}
+            </div>
+          </td>
+        </tr>`).join('');
 
-    // Timers para subastas activas
-    this.list.forEach(s => {
-      if (s.estado === 'ACTIVA') {
-        UI.Timers.start(`timer-${s.id}`, s.fechaFin);  // fechaFin → fechaFin
-      }
-    });
+        // Timer — usar fechaFin en lugar de fechaFin
+        this.list.forEach(s => {
+          if (s.estado === 'ACTIVA') {
+            UI.Timers.start(`timer-${s.id}`, s.fechaFin);
+          }
+        });
 
       } catch(e) {
         tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--text-muted)">Error al cargar subastas</td></tr>`;
@@ -375,7 +391,7 @@ const App = (() => {
             <label class="form-label">Producto <span class="required">*</span></label>
             <select name="productoId" class="form-control" id="sb-producto-select">
               <option value="">Seleccioná un producto...</option>
-              ${productos.map(p => `<option value="${p.id}" ${p.id == preselectedProductoId ? 'selected' : ''}>${p.titulo} (${p.condicion})</option>`).join('')}
+              ${productos.map(p => `<option value="${p.id}" ${p.id == preselectedProductoId ? 'selected' : ''}>${p.nombre} (${p.condicion})</option>`).join('')}
             </select>
             <div class="form-error">Seleccioná un producto.</div>
             <div class="form-hint">¿No ves el producto? Crealo primero desde la sección Productos.</div>
@@ -496,30 +512,30 @@ const App = (() => {
       });
     },
 
-    confirmarCancelar(id, titulo) {
+    confirmarCancelar(id, nombre) {
       UI.Modal.open({
         iconType: 'danger', iconEmoji: '⛔',
         title: 'Cancelar subasta',
-        desc: `¿Cancelar la subasta de <strong>"${titulo}"</strong>? Ingresá el motivo:`,
+        desc: `¿Cancelar la subasta de <strong>"${nombre}"</strong>? Ingresá el motivo:`,
         confirmLabel: 'Cancelar subasta', confirmClass: 'btn-danger',
         extraHtml: `<div class="modal-textarea"><textarea id="motivo-cancelacion" class="form-control" rows="3" placeholder="Motivo de cancelación (requerido)..." style="margin-top:var(--space-3)"></textarea></div>`,
         onConfirm: async () => {
           const motivo = document.getElementById('motivo-cancelacion')?.value?.trim();
           if (!motivo) { UI.Toast.error('Motivo requerido', 'Ingresá el motivo de cancelación.'); throw { data: '' }; }
           await API.SubastaService.cancelar(id, motivo);
-          UI.Toast.warning('Subasta cancelada', titulo);
+          UI.Toast.warning('Subasta cancelada', nombre);
           await this.render();
         }
       });
     },
 
-    async showHistorial(id, titulo) {
+    async showHistorial(id, nombre) {
       try {
         const historial = await API.SubastaService.historial(id);
 
         UI.Drawer.open({
           title: 'Historial de estados',
-          subtitle: titulo,
+          subtitle: nombre,
           saveLabel: null,
           bodyHtml: `
             <div style="display:flex;flex-direction:column;gap:0;">
@@ -561,13 +577,13 @@ const App = (() => {
 
   // ─── PUJAS ─────────────────────────────────────────────────
   const Pujas = {
-    async showForSubasta(id, titulo) {
+    async showForSubasta(id, nombre) {
       try {
         const pujas = await API.PujaService.listarPorSubasta(id);
 
         UI.Drawer.open({
           title: 'Historial de pujas',
-          subtitle: titulo,
+          subtitle: nombre,
           bodyHtml: `
             ${pujas.length === 0
               ? '<div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-title">Sin pujas registradas</div></div>'
