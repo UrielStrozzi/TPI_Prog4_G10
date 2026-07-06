@@ -108,13 +108,14 @@ public class UsuarioService {
     private UsuarioResponse mapearADto(Usuario usuario) {
         UsuarioResponse dto = new UsuarioResponse();
         dto.setId(usuario.getId());
+        dto.setUsername(usuario.getUsername()); // ← faltaba esta línea
         dto.setNombre(usuario.getNombre());
         dto.setEmail(usuario.getEmail());
         dto.setBloqueado(usuario.isBloqueado());
-        
+
         if (usuario.getRoles() != null) {
             Set<String> rolesStr = usuario.getRoles().stream()
-                    .map(rol -> rol.getNombre().name()) 
+                    .map(rol -> rol.getNombre().name())
                     .collect(Collectors.toSet());
             dto.setRoles(rolesStr);
         }

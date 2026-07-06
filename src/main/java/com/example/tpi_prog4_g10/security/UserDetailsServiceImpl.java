@@ -36,7 +36,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
                 // CORREGIDO: Mapeamos el rol limpio, sin meterle "ROLE_" de prepo
                 List<GrantedAuthority> authorities = usuario.getRoles().stream()
-                                .map(rol -> new SimpleGrantedAuthority(rol.getNombre().name()))
+                                .map(rol -> new SimpleGrantedAuthority("ROLE_" + rol.getNombre().name()))
                                 .collect(Collectors.toList());
 
                 return new org.springframework.security.core.userdetails.User(

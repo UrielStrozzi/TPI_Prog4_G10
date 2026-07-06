@@ -8,7 +8,6 @@ import com.example.tpi_prog4_g10.repository.PujaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.tpi_prog4_g10.repository.UsuarioRepository;
-import com.example.tpi_prog4_g10.service.HistorialEstadoService;
 
 import java.time.Instant;
 import java.util.List;
