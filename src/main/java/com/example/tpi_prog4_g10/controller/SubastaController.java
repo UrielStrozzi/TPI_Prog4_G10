@@ -34,6 +34,9 @@ public class SubastaController {
 
     @PostMapping
     public ResponseEntity<SubastaResponse> crear(@RequestBody SubastaCreateRequest request) {
+    System.out.println("Request recibido: " + request);
+    System.out.println("fechaInicio: " + request.getFechaInicio());
+    System.out.println("fechaFin: " + request.getFechaFin());
         Producto producto = productoService.obtenerPorId(request.getProductoId());
 
         Subasta subasta = Subasta.builder()
@@ -50,8 +53,11 @@ public class SubastaController {
     }
 
     @PostMapping("/{id}/publicar")
-    public ResponseEntity<SubastaResponse> publicar(@PathVariable Long id) {
-        Subasta subastaPublicada = subastaService.publicarSubasta(id);
+    @PreAuthorize("hasRole('SELLER')")
+    public ResponseEntity<SubastaResponse> publicar(
+            @PathVariable Long id,
+            Authentication authentication) {
+        Subasta subastaPublicada = subastaService.publicarSubasta(id, authentication.getName());
         return ResponseEntity.ok(convertirADto(subastaPublicada));
     }
 

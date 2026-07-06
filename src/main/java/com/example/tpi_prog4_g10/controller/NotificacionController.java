@@ -1,6 +1,5 @@
 package com.example.tpi_prog4_g10.controller;
 
-import com.example.tpi_prog4_g10.model.Notificacion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,8 +28,9 @@ public class NotificacionController {
     public ResponseEntity<List<Notificacion>> obtenerMisNotificaciones(
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        Usuario usuario = usuarioRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado."));
+    Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
+        .or(() -> usuarioRepository.findByUsername(userDetails.getUsername()))
+        .orElseThrow(() -> new RuntimeException("Usuario no encontrado."));
 
         return ResponseEntity.ok(notificacionService.obtenerPorUsuario(usuario.getId()));
     }

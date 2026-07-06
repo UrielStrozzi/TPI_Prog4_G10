@@ -8,6 +8,7 @@ import com.example.tpi_prog4_g10.repository.PujaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.tpi_prog4_g10.repository.UsuarioRepository;
+import com.example.tpi_prog4_g10.service.HistorialEstadoService;
 
 import java.time.Instant;
 import java.util.List;
@@ -24,6 +25,8 @@ public class SubastaService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    @Autowired
+    private HistorialEstadoService historialEstadoService;
     
     public Subasta crearSubasta(Subasta subasta) {
 
@@ -35,31 +38,38 @@ public class SubastaService {
             subasta.setVendedor(subasta.getProducto().getVendedor());
         }
 
-        if (subasta.getFechaFin() == null
-                || subasta.getFechaInicio() == null) {
-            throw new RuntimeException(
-                    "Las fechas de inicio y fin son obligatorias.");
+        if (subasta.getFechaFin() == null || subasta.getFechaInicio() == null) {
+            throw new RuntimeException("Las fechas de inicio y fin son obligatorias.");
         }
 
-        if (!subasta.getFechaFin()
-                .isAfter(subasta.getFechaInicio())) {
-            throw new RuntimeException(
-                    "La fecha de cierre debe ser posterior a la fecha de inicio.");
+        if (!subasta.getFechaFin().isAfter(subasta.getFechaInicio())) {
+            throw new RuntimeException("La fecha de cierre debe ser posterior a la fecha de inicio.");
         }
-
+   
         subasta.setEstado(EstadoSubasta.BORRADOR);
 
         return subastaRepository.save(subasta);
     }
 
-    public Subasta publicarSubasta(Long id) {
+    public Subasta publicarSubasta(Long id, String emailUsuario) {
         Subasta subasta = obtenerPorId(id);
-        
+
         if (subasta.getEstado() != EstadoSubasta.BORRADOR) {
-            throw new RuntimeException("Error: Solo se pueden publicar subastas en estado BORRADOR.");
+            throw new RuntimeException("Solo se pueden publicar subastas en estado BORRADOR.");
         }
-        
-        subasta.setEstado(EstadoSubasta.PUBLICADA); 
+
+        Usuario usuario = usuarioRepository.findByEmail(emailUsuario)
+            .or(() -> usuarioRepository.findByUsername(emailUsuario))
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        historialEstadoService.registrar(
+            subasta,
+            EstadoSubasta.BORRADOR,
+            EstadoSubasta.PUBLICADA,
+            usuario,
+            "Publicación manual por vendedor");
+
+        subasta.setEstado(EstadoSubasta.PUBLICADA);
         return subastaRepository.save(subasta);
     }
 
@@ -111,13 +121,20 @@ public class SubastaService {
             );
         }
 
-        subasta.setFechaCancelacion(Instant.now());
-
-        Usuario solicitante = usuarioRepository.findByEmail(emailSolicitante)
+        Usuario responsable = usuarioRepository.findByEmail(emailSolicitante)
             .or(() -> usuarioRepository.findByUsername(emailSolicitante))
             .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        subasta.setCanceladoPor(solicitante);
 
+        // Registrar historial
+        historialEstadoService.registrar(
+            subasta,
+            estadoActual,           // el estado antes de cancelar
+            EstadoSubasta.CANCELADA,
+            responsable,
+            motivo != null ? motivo : "Cancelación manual");
+
+        subasta.setFechaCancelacion(Instant.now());
+        subasta.setCanceladoPor(responsable);
         return subastaRepository.save(subasta);
     }
 
