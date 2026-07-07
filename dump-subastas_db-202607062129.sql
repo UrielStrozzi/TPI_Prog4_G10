@@ -24,8 +24,8 @@ DROP TABLE IF EXISTS `categorias`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `categorias` (
   `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(100) NOT NULL,
-  `descripcion` varchar(500) DEFAULT NULL,
+  `nombre` varchar(50) NOT NULL,
+  `descripcion` varchar(255) DEFAULT NULL,
   `slug` varchar(120) DEFAULT NULL,
   `padre_id` int(11) DEFAULT NULL,
   `activa` tinyint(1) NOT NULL DEFAULT 1,
@@ -61,7 +61,7 @@ CREATE TABLE `disputas` (
   `iniciador_id` bigint(20) unsigned NOT NULL,
   `motivo` varchar(300) NOT NULL,
   `descripcion` text DEFAULT NULL,
-  `estado` enum('ABIERTA','RESUELTA','CERRADA') NOT NULL DEFAULT 'ABIERTA',
+  `estado` enum('ABIERTA','CERRADA','RESUELTA') NOT NULL,
   `resuelto_por_id` bigint(20) unsigned DEFAULT NULL,
   `resolucion` text DEFAULT NULL,
   `estado_final_subasta` enum('ADJUDICADA','FINALIZADA','CANCELADA') DEFAULT NULL,
@@ -77,7 +77,7 @@ CREATE TABLE `disputas` (
   CONSTRAINT `fk_disputas_iniciador` FOREIGN KEY (`iniciador_id`) REFERENCES `usuarios` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `fk_disputas_resuelto_por` FOREIGN KEY (`resuelto_por_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `fk_disputas_subasta` FOREIGN KEY (`subasta_id`) REFERENCES `subastas` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Disputas sobre subastas adjudicadas. Solo un ADMIN puede resolver.';
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Disputas sobre subastas adjudicadas. Solo un ADMIN puede resolver.';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -86,6 +86,7 @@ CREATE TABLE `disputas` (
 
 LOCK TABLES `disputas` WRITE;
 /*!40000 ALTER TABLE `disputas` DISABLE KEYS */;
+INSERT INTO `disputas` VALUES (1,6,2,'El comprador no realizó el pago acordado.','Pasaron 5 días hábiles y no hay respuesta del ganador.','RESUELTA',1,'El pago fue confirmado. Subasta adjudicada correctamente.',NULL,'2026-07-06 22:33:27.000','2026-07-06 22:37:06.000','2026-07-06 19:33:27.969','2026-07-06 19:37:06.832'),(2,7,2,'El comprador no realizó el pago acordado.','Pasaron 5 días hábiles y no hay respuesta del ganador.','RESUELTA',1,'Incumplimiento del comprador. Subasta cancelada.',NULL,'2026-07-06 23:54:45.000','2026-07-06 23:57:48.000','2026-07-06 20:54:45.203','2026-07-06 20:57:48.307');
 /*!40000 ALTER TABLE `disputas` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -99,8 +100,8 @@ DROP TABLE IF EXISTS `historial_estados_subasta`;
 CREATE TABLE `historial_estados_subasta` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `subasta_id` bigint(20) unsigned NOT NULL,
-  `estado_anterior` enum('BORRADOR','PUBLICADA','ACTIVA','FINALIZADA','CANCELADA','ADJUDICADA','EN_DISPUTA') DEFAULT NULL,
-  `estado_nuevo` enum('BORRADOR','PUBLICADA','ACTIVA','FINALIZADA','CANCELADA','ADJUDICADA','EN_DISPUTA') NOT NULL,
+  `estado_anterior` enum('ACTIVA','ADJUDICADA','BORRADOR','CANCELADA','EN_DISPUTA','FINALIZADA','PUBLICADA') DEFAULT NULL,
+  `estado_nuevo` enum('ACTIVA','ADJUDICADA','BORRADOR','CANCELADA','EN_DISPUTA','FINALIZADA','PUBLICADA') NOT NULL,
   `usuario_id` bigint(20) unsigned DEFAULT NULL,
   `motivo` text DEFAULT NULL,
   `fecha` datetime(3) NOT NULL DEFAULT current_timestamp(3),
@@ -110,7 +111,7 @@ CREATE TABLE `historial_estados_subasta` (
   KEY `idx_he_fecha` (`fecha`),
   CONSTRAINT `fk_he_subasta` FOREIGN KEY (`subasta_id`) REFERENCES `subastas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_he_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Historial inmutable de transiciones de estado por subasta. Nunca se borra.';
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Historial inmutable de transiciones de estado por subasta. Nunca se borra.';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -119,6 +120,7 @@ CREATE TABLE `historial_estados_subasta` (
 
 LOCK TABLES `historial_estados_subasta` WRITE;
 /*!40000 ALTER TABLE `historial_estados_subasta` DISABLE KEYS */;
+INSERT INTO `historial_estados_subasta` VALUES (1,3,'PUBLICADA','ACTIVA',NULL,'Inicio automático','2026-07-05 01:57:18.000'),(2,5,'BORRADOR','PUBLICADA',2,'Publicación manual por vendedor','2026-07-06 21:47:15.000'),(3,5,'PUBLICADA','ACTIVA',NULL,'Inicio automático','2026-07-06 22:19:01.000'),(4,1,'BORRADOR','PUBLICADA',2,'Publicación manual por vendedor','2026-07-06 23:36:44.000'),(5,1,'PUBLICADA','ACTIVA',NULL,'Inicio automático','2026-07-06 23:37:04.000'),(6,1,'ACTIVA','FINALIZADA',NULL,'Cierre automático sin pujas','2026-07-06 23:37:04.000'),(7,7,'BORRADOR','PUBLICADA',2,'Publicación manual por vendedor','2026-07-06 23:44:48.000'),(8,7,'PUBLICADA','ACTIVA',NULL,'Inicio automático','2026-07-06 23:45:04.000'),(9,7,'ACTIVA','FINALIZADA',NULL,'Cierre automático sin pujas','2026-07-06 23:45:04.000');
 /*!40000 ALTER TABLE `historial_estados_subasta` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -133,16 +135,17 @@ CREATE TABLE `notificaciones` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `usuario_id` bigint(20) unsigned NOT NULL,
   `subasta_id` bigint(20) unsigned DEFAULT NULL,
-  `tipo` enum('SUBASTA_GANADA','SUBASTA_ADJUDICADA','PUJA_SUPERADA','SUBASTA_CANCELADA','DISPUTA_ABIERTA','DISPUTA_RESUELTA','SUBASTA_POR_CERRAR','SISTEMA') NOT NULL,
+  `tipo` enum('DISPUTA_ABIERTA','DISPUTA_RESUELTA','PUJA_SUPERADA','SISTEMA','SUBASTA_ADJUDICADA','SUBASTA_CANCELADA','SUBASTA_GANADA','SUBASTA_POR_CERRAR') NOT NULL,
   `titulo` varchar(200) NOT NULL,
   `cuerpo` text DEFAULT NULL,
-  `estado` enum('PENDIENTE','LEIDA','ARCHIVADA') NOT NULL DEFAULT 'PENDIENTE',
+  `estado` enum('ARCHIVADA','LEIDA','PENDIENTE') NOT NULL,
   `leida_at` datetime(3) DEFAULT NULL,
   `created_at` datetime(3) NOT NULL DEFAULT current_timestamp(3),
   PRIMARY KEY (`id`),
   KEY `idx_notif_usuario_leida` (`usuario_id`),
   KEY `idx_notif_usuario_fecha` (`usuario_id`,`created_at`),
   KEY `idx_notif_subasta_id` (`subasta_id`),
+  KEY `idx_notif_usuario_estado` (`usuario_id`,`estado`),
   CONSTRAINT `fk_notif_subasta` FOREIGN KEY (`subasta_id`) REFERENCES `subastas` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `fk_notif_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Notificaciones en BD. Escalar a canales externos sin modificar esta tabla.';
@@ -168,19 +171,19 @@ CREATE TABLE `productos` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `vendedor_id` bigint(20) unsigned NOT NULL,
   `categoria_id` smallint(5) unsigned NOT NULL,
-  `titulo` varchar(200) NOT NULL,
   `descripcion` text DEFAULT NULL,
   `condicion` enum('NUEVO','USADO','REACONDICIONADO') NOT NULL DEFAULT 'USADO',
   `deleted_at` datetime(3) DEFAULT NULL,
   `created_at` datetime(3) NOT NULL DEFAULT current_timestamp(3),
   `updated_at` datetime(3) NOT NULL DEFAULT current_timestamp(3) ON UPDATE current_timestamp(3),
+  `nombre` varchar(200) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_productos_vendedor_id` (`vendedor_id`),
   KEY `idx_productos_categoria_id` (`categoria_id`),
   KEY `idx_productos_deleted_at` (`deleted_at`),
   CONSTRAINT `fk_productos_categoria` FOREIGN KEY (`categoria_id`) REFERENCES `categorias` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `fk_productos_vendedor` FOREIGN KEY (`vendedor_id`) REFERENCES `usuarios` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Productos publicables en subastas. Escalar con imágenes, atributos, etc.';
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Productos publicables en subastas. Escalar con imágenes, atributos, etc.';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -189,7 +192,7 @@ CREATE TABLE `productos` (
 
 LOCK TABLES `productos` WRITE;
 /*!40000 ALTER TABLE `productos` DISABLE KEYS */;
-INSERT INTO `productos` VALUES (1,2,1,'MacBook Pro 14 M3 — Precio actualizado','Batería al 95%. Incluye cargador original.','USADO','2026-06-30 23:02:09.000','2026-06-30 22:49:28.000','2026-06-30 23:02:09.000'),(2,2,1,'Ipgone Pro 14 Max','Excelente estado. 4GB RAM, 512GB SSD. Caja original.','USADO',NULL,'2026-07-02 01:09:02.000','2026-07-02 01:09:02.000');
+INSERT INTO `productos` VALUES (1,2,1,'Batería al 95%. Incluye cargador original.','USADO','2026-06-30 23:02:09.000','2026-06-30 22:49:28.000','2026-07-06 18:14:06.067','MacBook Pro 14 M3 2023'),(2,2,1,'Excelente estado. 4GB RAM, 512GB SSD. Caja original.','USADO','2026-07-06 00:53:19.000','2026-07-02 01:09:02.000','2026-07-06 18:14:06.071','iPhone 15 Pro Max 256GB'),(3,2,1,'Excelente estado','NUEVO',NULL,'2026-07-04 23:52:52.000','2026-07-06 18:14:06.076','Silla Gamer ErgoMax Pro'),(4,2,1,'Excelente estado. 16GB RAM, 512GB SSD. Caja original.','NUEVO',NULL,'2026-07-05 02:17:43.000','2026-07-06 18:14:06.080','Guitarra Fender Stratocaster 1978'),(5,2,1,'Buenaso','NUEVO',NULL,'2026-07-05 02:33:12.000','2026-07-06 18:14:06.129','Monitor LG UltraWide 34 pulgadas'),(7,2,1,'Excelente estado. 16GB RAM, 512GB SSD. Caja original.','USADO','2026-07-06 23:34:31.000','2026-07-06 23:33:15.000','2026-07-06 23:34:31.000','Samsumg Pro 14 pulgadas M3 2023');
 /*!40000 ALTER TABLE `productos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -206,7 +209,7 @@ CREATE TABLE `pujas` (
   `usuario_id` bigint(20) unsigned NOT NULL,
   `monto` decimal(15,2) NOT NULL,
   `fecha_hora` datetime(3) NOT NULL DEFAULT current_timestamp(3),
-  `estado` enum('CONFIRMADA','ANULADA') NOT NULL DEFAULT 'CONFIRMADA',
+  `estado` enum('ANULADA','CONFIRMADA') NOT NULL,
   `ip_origen` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_pujas_subasta_estado_monto` (`subasta_id`,`estado`,`monto`),
@@ -215,7 +218,7 @@ CREATE TABLE `pujas` (
   CONSTRAINT `fk_pujas_subasta` FOREIGN KEY (`subasta_id`) REFERENCES `subastas` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `fk_pujas_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `chk_pujas_monto` CHECK (`monto` > 0)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Pujas registradas. Las operaciones de INSERT son siempre transaccionales con bloqueo.';
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Pujas registradas. Las operaciones de INSERT son siempre transaccionales con bloqueo.';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -224,7 +227,7 @@ CREATE TABLE `pujas` (
 
 LOCK TABLES `pujas` WRITE;
 /*!40000 ALTER TABLE `pujas` DISABLE KEYS */;
-INSERT INTO `pujas` VALUES (1,2,3,155000.00,'2026-07-02 01:39:01.000','CONFIRMADA',NULL),(2,2,3,158000.00,'2026-07-02 01:41:04.000','CONFIRMADA',NULL);
+INSERT INTO `pujas` VALUES (1,2,3,155000.00,'2026-07-02 01:39:01.000','CONFIRMADA',NULL),(2,2,3,158000.00,'2026-07-02 01:41:04.000','CONFIRMADA',NULL),(3,6,3,143000.00,'2026-07-06 22:26:19.000','CONFIRMADA',NULL),(4,7,3,155000.00,'2026-07-06 23:47:05.000','CONFIRMADA',NULL),(5,7,3,161000.00,'2026-07-06 23:49:14.000','CONFIRMADA',NULL),(6,7,3,166500.00,'2026-07-06 23:50:06.000','CONFIRMADA',NULL);
 /*!40000 ALTER TABLE `pujas` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -272,7 +275,7 @@ CREATE TABLE `subastas` (
   `descripcion` text DEFAULT NULL,
   `fecha_inicio` datetime(3) NOT NULL,
   `fecha_cierre` datetime(3) NOT NULL,
-  `estado` enum('BORRADOR','PUBLICADA','ACTIVA','FINALIZADA','CANCELADA','ADJUDICADA','EN_DISPUTA') NOT NULL DEFAULT 'BORRADOR',
+  `estado` enum('ACTIVA','ADJUDICADA','BORRADOR','CANCELADA','EN_DISPUTA','FINALIZADA','PUBLICADA') NOT NULL,
   `monto_actual` decimal(15,2) DEFAULT NULL,
   `ganador_id` bigint(20) unsigned DEFAULT NULL,
   `fecha_adjudicacion` datetime(3) DEFAULT NULL,
@@ -298,7 +301,7 @@ CREATE TABLE `subastas` (
   CONSTRAINT `chk_subastas_fechas` CHECK (`fecha_cierre` > `fecha_inicio`),
   CONSTRAINT `chk_subastas_precio_base` CHECK (`precio_base` > 0),
   CONSTRAINT `chk_subastas_incremento` CHECK (`incremento_minimo` > 0)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Subastas. monto_actual y ganador_id se actualizan en cada puja transaccional.';
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Subastas. monto_actual y ganador_id se actualizan en cada puja transaccional.';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -307,7 +310,7 @@ CREATE TABLE `subastas` (
 
 LOCK TABLES `subastas` WRITE;
 /*!40000 ALTER TABLE `subastas` DISABLE KEYS */;
-INSERT INTO `subastas` VALUES (1,1,2,150000.00,5000.00,NULL,'2025-06-28 21:00:00.000','2025-06-28 21:05:00.000','BORRADOR',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2026-07-01 01:20:48.000','2026-07-01 01:20:48.000',0),(2,2,2,100000.00,3000.00,NULL,'2026-07-02 01:33:00.000','2026-07-02 01:48:37.000','ADJUDICADA',158000.00,3,'2026-07-02 01:48:53.000',158000.00,NULL,NULL,NULL,'2026-07-02 01:10:59.000','2026-07-02 01:48:53.000',0);
+INSERT INTO `subastas` VALUES (1,1,2,150000.00,5000.00,NULL,'2025-06-28 21:00:00.000','2025-06-28 21:05:00.000','FINALIZADA',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2026-07-01 01:20:48.000','2026-07-06 23:37:04.000',3),(2,2,2,100000.00,3000.00,NULL,'2026-07-02 01:33:00.000','2026-07-02 01:48:37.000','ADJUDICADA',158000.00,3,'2026-07-02 01:48:53.000',158000.00,NULL,NULL,NULL,'2026-07-02 01:10:59.000','2026-07-02 01:48:53.000',0),(3,2,2,100.00,5.00,NULL,'2026-07-05 01:14:00.000','2026-07-09 01:18:00.000','ACTIVA',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2026-07-05 00:14:55.000','2026-07-05 01:57:18.000',2),(4,2,2,120.00,5.00,NULL,'2026-07-05 03:09:00.000','2026-07-09 03:09:00.000','BORRADOR',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2026-07-05 02:10:09.000','2026-07-05 02:10:09.000',0),(5,4,2,1500.00,10.00,NULL,'2026-07-06 21:59:00.000','2026-07-10 21:59:00.000','ACTIVA',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2026-07-06 21:00:05.000','2026-07-06 22:19:01.000',2),(6,1,2,100000.00,5000.00,NULL,'2026-07-06 22:30:43.000','2026-07-06 22:41:43.000','ADJUDICADA',143000.00,NULL,NULL,NULL,NULL,NULL,NULL,'2026-07-06 21:17:29.000','2026-07-06 22:37:06.000',3),(7,1,2,150000.00,5000.00,NULL,'2026-07-06 23:51:42.000','2026-07-07 00:02:42.000','CANCELADA',166500.00,NULL,NULL,NULL,NULL,NULL,NULL,'2026-07-06 23:44:17.000','2026-07-06 23:57:48.000',8);
 /*!40000 ALTER TABLE `subastas` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -338,7 +341,7 @@ CREATE TABLE `usuario_roles` (
 
 LOCK TABLES `usuario_roles` WRITE;
 /*!40000 ALTER TABLE `usuario_roles` DISABLE KEYS */;
-INSERT INTO `usuario_roles` VALUES (1,1,'2026-06-29 14:49:57.513',NULL),(1,3,'2026-06-29 22:26:05.350',NULL),(2,1,'2026-06-30 19:23:48.066',NULL),(2,2,'2026-06-30 19:23:48.065',NULL),(3,1,'2026-06-29 14:55:08.576',NULL),(4,1,'2026-07-01 20:36:59.143',NULL);
+INSERT INTO `usuario_roles` VALUES (1,1,'2026-06-29 14:49:57.513',NULL),(1,3,'2026-06-29 22:26:05.350',NULL),(2,1,'2026-06-30 19:23:48.066',NULL),(2,2,'2026-06-30 19:23:48.065',NULL),(3,1,'2026-06-29 14:55:08.576',NULL),(4,1,'2026-07-01 20:36:59.143',NULL),(4,3,'2026-07-06 20:18:43.106',NULL),(5,1,'2026-07-06 20:17:47.335',NULL),(5,3,'2026-07-06 20:20:10.669',NULL),(6,1,'2026-07-06 20:20:58.026',NULL);
 /*!40000 ALTER TABLE `usuario_roles` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -373,7 +376,7 @@ CREATE TABLE `usuarios` (
   KEY `idx_usuarios_bloqueado` (`bloqueado`),
   KEY `idx_usuarios_deleted_at` (`deleted_at`),
   CONSTRAINT `fk_usuarios_bloqueado_por` FOREIGN KEY (`bloqueado_por`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Usuarios del sistema. Escalar con columnas extra sin romper estructura.';
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Usuarios del sistema. Escalar con columnas extra sin romper estructura.';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -382,7 +385,7 @@ CREATE TABLE `usuarios` (
 
 LOCK TABLES `usuarios` WRITE;
 /*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
-INSERT INTO `usuarios` VALUES (1,'admin_root','admin@subastas.com','$2a$10$tV1x8Gj0i/QpYeKIUaHPr.ejm1/fUaPNLxeK4xoRAqr8mzQ.dvUz2','Admin','Sistema',NULL,0,NULL,NULL,NULL,NULL,'2026-06-29 17:49:57.000','2026-06-29 17:49:57.000'),(2,'seller_root','seller@subastas.com','$2a$10$t3cG2aUl35Gw8bP0ROdJmuuhJWYUmJ1i8mbEluPpbjRRsVQ7djQdm','Seller','Sistema',NULL,0,NULL,NULL,NULL,NULL,'2026-06-29 17:54:55.000','2026-06-30 22:23:48.000'),(3,'user_root','user@subastas.com','$2a$10$eNJx/acK3QFxEZ04lAz6h./JpvQRP1dYm5XFii2mX0d2zeveLI.66','User','Sistema',NULL,0,NULL,NULL,NULL,NULL,'2026-06-29 17:55:08.000','2026-06-30 22:32:02.000'),(4,'uri12','urielstrozzi@gmail.com','$2a$10$vHR.qsMNXF5/slJz9gk7duk5emSTBew7JHnObQ.mm1Ii0SAEzMbbe','Uriel','Strozzi',NULL,0,NULL,NULL,NULL,NULL,'2026-07-01 23:36:59.000','2026-07-01 23:36:59.000');
+INSERT INTO `usuarios` VALUES (1,'admin_root','admin@subastas.com','$2a$10$tV1x8Gj0i/QpYeKIUaHPr.ejm1/fUaPNLxeK4xoRAqr8mzQ.dvUz2','Admin','Sistema',NULL,0,NULL,NULL,NULL,NULL,'2026-06-29 17:49:57.000','2026-06-29 17:49:57.000'),(2,'seller_root','seller@subastas.com','$2a$10$t3cG2aUl35Gw8bP0ROdJmuuhJWYUmJ1i8mbEluPpbjRRsVQ7djQdm','Seller','Sistema',NULL,0,NULL,NULL,NULL,NULL,'2026-06-29 17:54:55.000','2026-06-30 22:23:48.000'),(3,'user_root','user@subastas.com','$2a$10$eNJx/acK3QFxEZ04lAz6h./JpvQRP1dYm5XFii2mX0d2zeveLI.66','User','Sistema',NULL,0,NULL,NULL,NULL,NULL,'2026-06-29 17:55:08.000','2026-06-30 22:32:02.000'),(4,'uri12','urielstrozzi@gmail.com','$2a$10$vHR.qsMNXF5/slJz9gk7duk5emSTBew7JHnObQ.mm1Ii0SAEzMbbe','Uriel','Strozzi',NULL,0,NULL,NULL,NULL,NULL,'2026-07-01 23:36:59.000','2026-07-01 23:36:59.000'),(5,'admin_root3','admin3@subastas.com','$2a$10$/8ds/dFMgwysgkip1Cwtf.sdCP0bVZH5TkUkSew3KDm2nlkWOy8Kq','Admin3','Sistema',NULL,0,NULL,NULL,NULL,NULL,'2026-07-06 23:17:47.000','2026-07-06 23:17:47.000'),(6,'user_root3','user3@subastas.com','$2a$10$NeAftHtsBaS5Q8S0NacOSOrhuYezZ0iCeUxSZxM/BaqbkmWhWxr6K','User3','Sistema',NULL,0,NULL,NULL,NULL,NULL,'2026-07-06 23:20:58.000','2026-07-06 23:20:58.000');
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -425,7 +428,7 @@ SET @saved_cs_client     = @@character_set_client;
  1 AS `subasta_descripcion`,
  1 AS `publicada_at`,
  1 AS `producto_id`,
- 1 AS `producto_titulo`,
+ 1 AS `producto_nombre`,
  1 AS `producto_condicion`,
  1 AS `categoria_nombre`,
  1 AS `vendedor_id`,
@@ -468,7 +471,7 @@ SET character_set_client = @saved_cs_client;
 /*!50001 SET collation_connection      = utf8mb4_general_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `v_subastas_publicas` AS select `s`.`id` AS `subasta_id`,`s`.`estado` AS `estado`,`s`.`precio_base` AS `precio_base`,`s`.`incremento_minimo` AS `incremento_minimo`,`s`.`monto_actual` AS `monto_actual`,`s`.`fecha_inicio` AS `fecha_inicio`,`s`.`fecha_cierre` AS `fecha_cierre`,`s`.`descripcion` AS `subasta_descripcion`,`s`.`created_at` AS `publicada_at`,`p`.`id` AS `producto_id`,`p`.`titulo` AS `producto_titulo`,`p`.`condicion` AS `producto_condicion`,`c`.`nombre` AS `categoria_nombre`,`u`.`id` AS `vendedor_id`,`u`.`username` AS `vendedor_username`,(select count(0) from `pujas` where `pujas`.`subasta_id` = `s`.`id` and `pujas`.`estado` = 'CONFIRMADA') AS `total_pujas` from (((`subastas` `s` join `productos` `p` on(`p`.`id` = `s`.`producto_id`)) join `categorias` `c` on(`c`.`id` = `p`.`categoria_id`)) join `usuarios` `u` on(`u`.`id` = `s`.`vendedor_id`)) where `s`.`estado` <> 'BORRADOR' and `p`.`deleted_at` is null and `u`.`deleted_at` is null */;
+/*!50001 VIEW `v_subastas_publicas` AS select `s`.`id` AS `subasta_id`,`s`.`estado` AS `estado`,`s`.`precio_base` AS `precio_base`,`s`.`incremento_minimo` AS `incremento_minimo`,`s`.`monto_actual` AS `monto_actual`,`s`.`fecha_inicio` AS `fecha_inicio`,`s`.`fecha_cierre` AS `fecha_cierre`,`s`.`descripcion` AS `subasta_descripcion`,`s`.`created_at` AS `publicada_at`,`p`.`id` AS `producto_id`,`p`.`nombre` AS `producto_nombre`,`p`.`condicion` AS `producto_condicion`,`c`.`nombre` AS `categoria_nombre`,`u`.`id` AS `vendedor_id`,`u`.`username` AS `vendedor_username`,(select count(0) from `pujas` where `pujas`.`subasta_id` = `s`.`id` and `pujas`.`estado` = 'CONFIRMADA') AS `total_pujas` from (((`subastas` `s` join `productos` `p` on(`p`.`id` = `s`.`producto_id`)) join `categorias` `c` on(`c`.`id` = `p`.`categoria_id`)) join `usuarios` `u` on(`u`.`id` = `s`.`vendedor_id`)) where `s`.`estado` <> 'BORRADOR' and `p`.`deleted_at` is null and `u`.`deleted_at` is null */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
@@ -482,4 +485,4 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-07-02 16:06:48
+-- Dump completed on 2026-07-06 21:29:17
